@@ -1,0 +1,15 @@
+{
+	"presets": [
+		[
+			"@babel/preset-env",
+			{
+				"targets": {
+					"node": "9.5"
+				},
+				"shippedProposals": true
+			}
+		],
+		"@babel/flow"
+	],
+	"sourceMaps": true
+}
