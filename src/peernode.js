@@ -3,48 +3,53 @@
 import http from "http"
 
 var NodeRSA = require("node-rsa")
+const fs = require("fs")
+
+var rsa = new NodeRSA({ b: 256 })
+var serverPort = 8100
 
 var httpServer = http.createServer((req, res) => {})
 
-httpServer.listen(8100, "127.0.0.1") // Port # subject to change
+httpServer.listen(serverPort, "127.0.0.1") // Port # subject to change
 
 console.log("PeerNode Server Running on 127.0.0.1:8100")
 init()
 
 //Init function
 function init() {
-	//TODO: Check existance of RSA key file
+	var fileName = /*'./data/' */ "onion" + serverPort + ".json"
+	console.log(fileName)
+	fs.exists(fileName, exists => {
+		if (exists) {
+			console.log("JSON exists, loading keys...")
+			//Load RSA files
+			var keys = JSON.parse(fs.readFileSync(fileName, "utf8"))
 
-	var key = new NodeRSA({ b: 256 }) // create 256-bit rsa key pair.
+			rsa.importKey(keys["public"], "pkcs8-public")
+			rsa.importKey(keys["private"], "pkcs8-private")
 
-	// Generate First key pair.
-	key.generateKeyPair()
-	var publicKey1 = key.exportKey("pkcs8-public") //export public key
-	var privateKey1 = key.exportKey("pkcs8-private") //export private key
-	console.log("First key pair")
-	console.log("----------------------------")
-	console.log("Public Key: " + publicKey1)
-	console.log("Private Key: " + privateKey1)
+			console.log("Keys loaded.")
+		} else {
+			console.log("Generating keys...")
 
-	// Generate Second key pair
-	key.generateKeyPair()
-	var publicKey2 = key.exportKey("pkcs8-public") //export public key
-	var privateKey2 = key.exportKey("pkcs8-private") //export private key
-	console.log("Second key pair")
-	console.log("----------------------------")
-	console.log("Public Key: " + publicKey2)
-	console.log("Private Key: " + privateKey2)
+			// Generate RSA key pair.
+			rsa.generateKeyPair()
+			var publicKey = rsa.exportKey("pkcs8-public") //export public key
+			var privateKey = rsa.exportKey("pkcs8-private") //export private key
+			console.log("First key pair")
+			console.log("----------------------------")
 
-	// Generate third key pair
-	key.generateKeyPair()
-	var publicKey3 = key.exportKey("pkcs8-public") //export public key
-	var privateKey3 = key.exportKey("pkcs8-private") //export private key
-	console.log("Third key pair")
-	console.log("----------------------------")
-	console.log("Public Key: " + publicKey3)
-	console.log("Private Key: " + privateKey3)
+			var keys = { public: publicKey, private: privateKey }
+			var jsonString = JSON.stringify(keys)
 
-	//TODO: write to RSA file.
+			//Create RSA key JSON file
+			fs.writeFile(fileName, jsonString, function(err) {
+				if (err) {
+					return console.log(err)
+				}
 
-	console.log("Initalized")
+				console.log("Keys generated.")
+			})
+		}
+	})
 }
