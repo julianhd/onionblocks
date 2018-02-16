@@ -13,7 +13,7 @@
 		"precommit": "lint-staged",
 		"prepublish": "npm run build",
 		"test": "jest --forceExit",
-		"start": "nodemon src/index.js --exec babel-node",
+		"start": "nodemon src/peernode.js --exec babel-node",
 		"serve": "node lib/index.js"
 	},
 	"private": true,
@@ -36,5 +36,8 @@
 	},
 	"lint-staged": {
 		"*.{js,json,css,md}": ["prettier --write", "git add"]
+	},
+	"dependencies": {
+		"node-rsa": "^0.4.2"
 	}
 }
