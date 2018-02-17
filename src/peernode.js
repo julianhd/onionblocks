@@ -2,17 +2,29 @@
 
 import http from "http"
 
-var NodeRSA = require("node-rsa")
+const NodeRSA = require("node-rsa")
 const fs = require("fs")
 
 var rsa = new NodeRSA({ b: 256 })
 var serverPort = 8100
 
-var httpServer = http.createServer((req, res) => {})
+var httpServer = http.createServer((req, res) => {
+	if (req.method == "POST" && req.url == "/request") {
+		var decryptedMessage = rsa.decrypt(res)
+
+		if (decryptedMessage["type"] == "relay") {
+			//Stuff happens that I now have to research.
+		} else if (decryptedMessage["type"] == "exit") {
+		} else {
+			console.log("Unknown request type: " + decryptedMessage["type"])
+		}
+	}
+})
 
 httpServer.listen(serverPort, "127.0.0.1") // Port # subject to change
 
 console.log("PeerNode Server Running on 127.0.0.1:8100")
+
 init()
 
 //Init function
@@ -52,4 +64,10 @@ function init() {
 			})
 		}
 	})
+
+	setInterval(timerRun, 30000)
+}
+
+function timerRun() {
+	console.log("timer")
 }
