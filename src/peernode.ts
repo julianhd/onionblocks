@@ -1,9 +1,6 @@
-//@flow
-
 import http from "http"
-
-const NodeRSA = require("node-rsa")
-const fs = require("fs")
+import fs from "fs"
+import NodeRSA from "node-rsa"
 
 var rsa = new NodeRSA({ b: 256 })
 var serverPort = 8100
