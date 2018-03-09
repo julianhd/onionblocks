@@ -1,9 +1,12 @@
 import http from "http"
+import finalhandler from "finalhandler"
+import serveStatic from "serve-static"
 
+const serve = serveStatic("./public")
 http
 	.createServer((req, res) => {
-		res.writeHead(200, { "Content-Type": "text/plain" })
-		res.end("mais\n")
+		const done = finalhandler(req, res)
+		serve(req as any, res as any, done)
 	})
 	.listen(8080, "127.0.0.1")
 
