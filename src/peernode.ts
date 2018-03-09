@@ -14,7 +14,11 @@ var peerNodeServer = http.createServer((req, res) => {
 		if (decryptedMessage["type"] == "relay") {
       
       // ------ TO BE TESTED --------
-			let options = { hostname: decryptedMessage["next"], port: serverPort, path: '/request', method: 'POST'};
+			let options = { hostname: decryptedMessage["next"]
+                    , port: serverPort
+                    , path: '/request'
+                    , method: 'POST''
+                    , body: decryptedMessage["message"]};
       
       http.request(options);
      
@@ -78,5 +82,9 @@ function init() {
 }
 
 function timerRun() {
-	console.log("timer")
+	console.log("timer");
+  
+  // ------------ TEMP ------------
+  let options = { hostname: "127.0.0.1", port: 80, path: '/mine', method: 'POST'};
+      
 }
