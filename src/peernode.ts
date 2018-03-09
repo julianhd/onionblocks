@@ -1,13 +1,13 @@
 import http from "http"
 import fs from "fs"
 import NodeRSA from "node-rsa"
-//import OnionNode from "Blockchain"
+import OnionNode from "Blockchain"
 
 var rsa = new NodeRSA({ b: 256 })
 var serverPort = 8100
 
 
-var httpServer = http.createServer((req, res) => {
+var peerNodeServer = http.createServer((req, res) => {
 	if (req.method == "POST" && req.url == "/request") {
 		var decryptedMessage = rsa.decrypt(res)
 
@@ -30,7 +30,7 @@ var httpServer = http.createServer((req, res) => {
 	}
 })
 
-httpServer.listen(serverPort, "127.0.0.1") // Port # subject to change
+peerNodeServer.listen(serverPort, "127.0.0.1") // Port # subject to change
 
 console.log("PeerNode Server Running on 127.0.0.1:8100")
 
