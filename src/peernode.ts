@@ -10,8 +10,29 @@ var httpServer = http.createServer((req, res) => {
 		var decryptedMessage = rsa.decrypt(res)
 
 		if (decryptedMessage["type"] == "relay") {
-			//Stuff happens that I now have to research.
+      
+      // ------ TO BE TESTED --------
+			const options = {
+      hostname: decryptedMessage["next"],
+      port: serverPort,
+      path: '/request',
+      method: 'POST' }
+      
+      http.request(options);
+      
+      
+};
 		} else if (decryptedMessage["type"] == "exit") {
+      
+      // ------------ TEMP ------------
+      const options = {
+      hostname: 127.0.0.1,
+      port: 80,
+      path: '/mine',
+      method: 'GET' }
+      
+      http.request(options);
+      
 		} else {
 			console.log("Unknown request type: " + decryptedMessage["type"])
 		}
