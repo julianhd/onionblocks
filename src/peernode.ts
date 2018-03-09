@@ -1,9 +1,11 @@
 import http from "http"
 import fs from "fs"
 import NodeRSA from "node-rsa"
+//import OnionNode from "Blockchain"
 
 var rsa = new NodeRSA({ b: 256 })
 var serverPort = 8100
+
 
 var httpServer = http.createServer((req, res) => {
 	if (req.method == "POST" && req.url == "/request") {
@@ -12,25 +14,14 @@ var httpServer = http.createServer((req, res) => {
 		if (decryptedMessage["type"] == "relay") {
       
       // ------ TO BE TESTED --------
-			const options = {
-      hostname: decryptedMessage["next"],
-      port: serverPort,
-      path: '/request',
-      method: 'POST' }
+			let options = { hostname: decryptedMessage["next"], port: serverPort, path: '/request', method: 'POST'};
       
       http.request(options);
-      
-      
-};
+     
 		} else if (decryptedMessage["type"] == "exit") {
       
       // ------------ TEMP ------------
-      const options = {
-      hostname: 127.0.0.1,
-      port: 80,
-      path: '/mine',
-      method: 'GET' }
-      
+      let options = { hostname: "127.0.0.1", port: 80, path: '/mine', method: 'POST'};
       http.request(options);
       
 		} else {
