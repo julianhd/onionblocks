@@ -1,13 +1,6 @@
-import http from "http"
-import finalhandler from "finalhandler"
-import serveStatic from "serve-static"
+import createStaticServer from "./createStaticServer"
 
-const serve = serveStatic("./public")
-http
-	.createServer((req, res) => {
-		const done = finalhandler(req, res)
-		serve(req as any, res as any, done)
-	})
-	.listen(8080, "127.0.0.1")
+const staticServer = createStaticServer()
+staticServer.listen(8080, "127.0.0.1")
 
-console.log("Server running at http://127.0.0.1:8080/")
+console.log("Server running at http://127.0.0.1:8080")
