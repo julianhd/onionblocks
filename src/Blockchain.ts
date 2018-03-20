@@ -39,8 +39,20 @@ export interface Verifier {
 	verify(blockchain: Array<Block<BlockContent>>): void
 }
 
+export type BlockHandlerCallback = (block: Block<BlockContent>) => void
+
 export default class Blockchain {
-	constructor(private verifier: Verifier) {}
+	constructor(
+		private verifier: Verifier | null,
+		private callback: BlockHandlerCallback,
+	) {
+		process.nextTick(async () => {
+			const blocks = await this.get()
+			for (const block of blocks) {
+				callback(block)
+			}
+		})
+	}
 
 	/**
 	 * Returns all the blocks from the blockchain server.
