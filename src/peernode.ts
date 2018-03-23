@@ -22,9 +22,8 @@ var peerNodeServer = http.createServer((req, res) => {
      
 		} else if (decryptedMessage["type"] == "exit") {
       
-      // ------------ TEMP ------------
-      let options = { hostname: "127.0.0.1", port: 80, path: '/mine', method: 'POST', body: decryptedMessage["message"]};
-      var req = http.request(options);
+      // ------------ TODO ------------
+      //Call Miner.mine
       
 		} else {
 			console.log("Unknown request type: " + decryptedMessage["type"])
@@ -105,8 +104,8 @@ function timerRun() {
   let node = new Node("127.0.0.1"); // TEMP till I find how to get server hostname
   let entity = new Entity(node, "3236826");
   
-  // ------------ TEMP ------------
-  // Send Entity to OnionRouting via OnionRouting.Request
-  let options = { hostname: "127.0.0.1", json: true, port: 80, path: '/request', method: 'POST', body: entity}; 
-  var req = http.request(options, function(res) {} ); // send Node Data to miner
+  // ------------ TODO ------------
+  // Send Entity to OnionRouting
+  //Call OnionRouting.Request
+  
 }
