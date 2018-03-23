@@ -106,7 +106,7 @@ function timerRun() {
   let entity = new Entity(node, "3236826");
   
   // ------------ TEMP ------------
-  // Send Entity to OnionRouting
-  let options = { hostname: "127.0.0.1", json: true, port: 80, path: '/routing', method: 'POST', body: entity}; 
+  // Send Entity to OnionRouting via OnionRouting.Request
+  let options = { hostname: "127.0.0.1", json: true, port: 80, path: '/request', method: 'POST', body: entity}; 
   var req = http.request(options, function(res) {} ); // send Node Data to miner
 }
