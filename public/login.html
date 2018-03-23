@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <script src="/chat.js"></script>
+</head>
+
+<header>
+    <div class="header-flex-container">
+        <div id="textbox" style="flex-grow: 5; ">
+            <h2>OnionBlocks</h2>
+        </div>
+        <div id="textbox" style="flex-grow: 8">
+            <ul>
+                <li>
+                    <a href="/" href="">Home</a>
+                </li>
+                <li>
+                    <a href="">About</a>
+                </li>
+                <li>
+                    <a href="login.html">Login</a>
+                </li>
+            </ul>
+        </div>
+        <div id="textbox" align="right" style="flex-grow: 1; padding: 10px">@username</div>
+        <div id="textbox" style="flex-grow: 0.2">
+            <img src="avatar.png" alt="Mountain View" width="45" height="45">
+        </div>
+    </div>
+</header>
+
+<script>
+    function reg() {
+        window.captureEvents(Event.SUBMIT);
+        window.onsubmit = hit;
+    }
+
+    function hit() {
+        event.preventDefault();
+        console.log('hit');
+        //get the message SOMEHOW
+        var pls = document.getElementById('username').value;
+        console.log(pls);
+        chat.sendChat(pls)
+    }
+
+</script>
+
+<body onload="reg();">
+    <div class="main-flex-container">
+
+        <div class="msgLog">
+            <h2>Login</h2>
+            <b>Username</b> <input type="text" id="username"  name="username">
+            <button onclick="hit()">Send</button>
+
+        </div>
+
+        <div>
+            <form>
+                <div class="input-flex-container">
+
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <footer>OnionBlocks &copy; 2018</footer>
+    </div>
+
+</html>
