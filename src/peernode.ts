@@ -25,7 +25,6 @@ var peerNodeServer = http.createServer((req, res) => {
       // ------------ TEMP ------------
       let options = { hostname: "127.0.0.1", port: 80, path: '/mine', method: 'POST', body: decryptedMessage["message"]};
       var req = http.request(options);
-      req.write(decryptedMessage["content"]);
       
 		} else {
 			console.log("Unknown request type: " + decryptedMessage["type"])
@@ -82,7 +81,7 @@ function init() {
 
 class Node implements OnionNode
 {
-  constructor(h: string) { host = h; }
+  constructor(h: string) { this.host = h; }
   type: "node"
 	timestamp: number
 	host: string
@@ -99,7 +98,7 @@ export class Entity
 }
 
 function timerRun() {
-	console.log("timer");
+	console.log("Created Entity");
   var host = "127.0.0.1";
   var timestamp = Date.now();
   
@@ -107,7 +106,7 @@ function timerRun() {
   let entity = new Entity(node, "3236826");
   
   // ------------ TEMP ------------
-  let options = { hostname: "127.0.0.1", json: true, port: 80, path: '/routing', method: 'POST', body: entity}; //OnionRouting
-  
+  // Send Entity to OnionRouting
+  let options = { hostname: "127.0.0.1", json: true, port: 80, path: '/routing', method: 'POST', body: entity}; 
   var req = http.request(options, function(res) {} ); // send Node Data to miner
 }
