@@ -36,7 +36,7 @@ export interface Block<T extends BlockContent> {
 }
 
 export interface Verifier {
-	verify(blockchain: Array<Block<BlockContent>>): void
+	verify(block: Block<BlockContent>, blockchain: Array<Block<BlockContent>>): void
 }
 
 export default class Blockchain {
