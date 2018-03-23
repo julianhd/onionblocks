@@ -39,7 +39,7 @@ init()
 
 //Init function
 function init() {
-	var fileName = /*'./data/' */ "onion" + serverPort + ".json"
+	var fileName = "onion" + serverPort + ".json"
 	console.log(fileName)
 	fs.exists(fileName, exists => {
 		if (exists) {
