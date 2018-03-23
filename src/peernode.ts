@@ -1,7 +1,9 @@
 import http from "http"
 import fs from "fs"
 import NodeRSA from "node-rsa"
-import OnionNode from "Blockchain"
+
+import { OnionNode, BlockContent } from './Blockchain.ts';
+let BContent: BlockContent;
 
 var rsa = new NodeRSA({ b: 256 })
 var serverPort = 8100
@@ -14,19 +16,16 @@ var peerNodeServer = http.createServer((req, res) => {
 		if (decryptedMessage["type"] == "relay") {
       
       // ------ TO BE TESTED --------
-			let options = { hostname: decryptedMessage["next"]
-                    , port: serverPort
-                    , path: '/request'
-                    , method: 'POST''
-                    , body: decryptedMessage["message"]};
+			let options = { hostname: decryptedMessage["next"], port: serverPort, path: '/request', method: 'POST', body: decryptedMessage["message"]};
       
       http.request(options);
      
 		} else if (decryptedMessage["type"] == "exit") {
       
       // ------------ TEMP ------------
-      let options = { hostname: "127.0.0.1", port: 80, path: '/mine', method: 'POST'};
-      http.request(options);
+      let options = { hostname: "127.0.0.1", port: 80, path: '/mine', method: 'POST', body: decryptedMessage["message"]};
+      var req = http.request(options);
+      req.write(decryptedMessage["content"]);
       
 		} else {
 			console.log("Unknown request type: " + decryptedMessage["type"])
@@ -81,10 +80,34 @@ function init() {
 	setInterval(timerRun, 30000)
 }
 
+class Node implements OnionNode
+{
+  constructor(h: string) { host = h; }
+  type: "node"
+	timestamp: number
+	host: string
+	public: string
+}
+export class Entity
+{
+  constructor(cont: BContent, sig: string){ 
+    this.content = cont; 
+    this.signature = sig;
+  }
+  content: BContent
+  signature: string
+}
+
 function timerRun() {
 	console.log("timer");
+  var host = "127.0.0.1";
+  var timestamp = Date.now();
+  
+  let node = new Node("127.0.0.1"); // TEMP till I find how to get server hostname
+  let entity = new Entity(node, "3236826");
   
   // ------------ TEMP ------------
-  let options = { hostname: "127.0.0.1", port: 80, path: '/mine', method: 'POST'};
-      
+  let options = { hostname: "127.0.0.1", json: true, port: 80, path: '/routing', method: 'POST', body: entity}; //OnionRouting
+  
+  var req = http.request(options, function(res) {} ); // send Node Data to miner
 }
