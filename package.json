@@ -29,7 +29,10 @@
 		"typescript": "^2.7.2"
 	},
 	"lint-staged": {
-		"*.{js,json,css,md}": ["prettier --write", "git add"]
+		"*.{js,json,css,md}": [
+			"prettier --write",
+			"git add"
+		]
 	},
 	"dependencies": {
 		"express": "^4.16.2",

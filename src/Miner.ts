@@ -1,40 +1,25 @@
 import http from "http"
 import express from "express"
 import Blockchain, { BlockData, Block, BlockContent } from "./Blockchain"
-import { createHash } from "crypto";
 
-// New miner
-interface miner {
-    sequence : number;
-    content : string;
-    previous : string;
-    nonce : number;
-    data : BlockData<BlockContent>;
-    mine(): Block<BlockContent>;
-    new_blockdata(BlockData);
-    new_block(data) : Block<BlockContent>;
-}
+const app = express();
 
-function new_blockdata(BlockData) {
-    // new block data
-    const data: BlockData<BlockContent> = {
-        sequence: 0,
-        previous: null,
-        content: null, // content type should be User.
-        nonce: 0 
-    
+class Miner {
+    blockdata: BlockData<BlockContent>;
+
+    async mine(BlockContent) {
+        // get the current blockchain
+        const blockchain = new Blockchain(null);        // will have Verifier once it is created
+        const blocks = await blockchain.get();
+        
+        // create a new block data
+        const new_blocks: BlockData<BlockContent> = {
+            sequence: 0,
+            nonce: 0,
+            previous: null,
+            content: BlockContent
+        }
+        return 0;
     }
-    return data;
 }
 
-function new_block(data) {
-    const hash = createHash("sha256");
-    const serialize_blockdata = JSON.stringify(data);
-    hash.update(serialize_blockdata);
-    
-    // TO-DO
-    // Check if the hash starts with 3 zeroes
-}
-function mine() {
-    // new block
-}  
