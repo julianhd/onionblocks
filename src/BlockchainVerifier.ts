@@ -3,20 +3,15 @@ import { createHash } from "crypto";
 import { BlockContent } from './Blockchain';
 import { Block } from './Blockchain';
 
+var names: String[] = [];   // Keep track of all the names of users.
+var map: Map<String, String> = new Map<String, String>();   // Maps names - publickey.
+
 class BlockchainVerifier {
     verify(block: Block<BlockContent>, blockchain: Array<Block<BlockContent>>) {
-        var names: String[] = [];   // By doing this, we lose the names of other blocks later on. TO IMPROVE.
-        var map: Map<String, String> = new Map<String, String>();   // Maps names - publickey. TO IMPROVE.
-        // // If there a known verified block.
-        // if (block != null) {
-        //     const serialization = JSON.stringify(block.data);
-        //     const hash = createHash("sha256");
-        //     hash.update(serialization);
-        //     const digest = hash.digest("hex");
-
-        // }
         var i:any;
         var preseq = 0;
+        if (block != null)
+            preseq = block.data.sequence;
         for (i in blockchain) {
             var cur = blockchain[i];
             const serialization = JSON.stringify(cur.data);
@@ -28,8 +23,6 @@ class BlockchainVerifier {
             if (i == 0) {
                 if (block == null)
                     preseq = cur.data.sequence;
-                else
-                    preseq = block.data.sequence;
             }
             else if (preseq != cur.data.sequence-1)
                 throw console.error("The sequence isn't exactly 1 greater than the previous block.");
