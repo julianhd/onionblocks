@@ -1,11 +1,25 @@
 import http from "http"
 import express from "express"
 import WebSocket from "ws"
-import Blockchain, { Chat, Block, BlockContent } from "./Blockchain"
+import Blockchain, { Chat, Block, BlockContent, Entity, User } from "./Blockchain"
 import cors from "cors"
+
+/**
+ * Dummy onion request function.
+ * 
+ * @param entity 
+ */
+function OnionRoutingRequest(entity: Entity) {
+	console.log(entity);
+}
+
+interface ServerUser extends User {
+	private: string
+}
 
 class ChatServer {
 	public readonly server: http.Server
+	private user: ServerUser | null
 
 	private websockets = new Set<WebSocket>()
 
@@ -47,7 +61,11 @@ class ChatServer {
 				console.log("User disconnected")
 				this.websockets.delete(ws)
 			})
+			ws.on("error", error => {
+				console.log(error)
+			})
 		})
+		this.user = null
 	}
 
 	/**
@@ -84,7 +102,52 @@ class ChatServer {
 	 * @param name username
 	 */
 	async register(name: string) {
-		// TODO: Implement Initialize
+		var rsa = require('node-rsa')
+		var keys = new rsa({ b: 256 })
+
+		keys.generateKeyPair()
+
+		var privateKey = keys.exportKey("pkcs8-private")
+		var publicKey = keys.exportKey("pkcs8-public")
+
+		// Save to a file
+		var fileSystem = require('fs')
+		var filePath = "./data/" + name + ".json"
+
+		let userInfo = {
+			private: privateKey,
+			public: publicKey
+		}
+
+		var user: User = {
+			type: "user",
+			timestamp: Date.now(),
+			name: name,
+			public: publicKey
+		}
+
+		var serverUser: ServerUser = {
+			type: "user",
+			timestamp: Date.now(),
+			name: name,
+			private: privateKey,
+			public: publicKey
+		}
+
+		var data = JSON.stringify(serverUser, null, 2)
+		fileSystem.writeFileSync(filePath, data)
+
+		this.user = serverUser
+
+		var userString = JSON.stringify(user)
+		var userBuffer = Buffer.from(userString)
+
+		var entity: Entity = {
+			object: user,
+			signature: keys.sign(userBuffer).toString("hex")
+		}
+
+		OnionRoutingRequest(entity)
 	}
 
 	/**
@@ -93,7 +156,11 @@ class ChatServer {
 	 * @param name username
 	 */
 	async login(name: string) {
-		// TODO: Load the user's RSA key for use in `sendChat`
+		var fileSystem = require('fs');
+		var filePath = "./data/" + name + ".json"
+
+		let rawData = fileSystem.readFileSync(filePath)
+		this.user = JSON.parse(rawData)
 	}
 
 	/**
@@ -102,7 +169,31 @@ class ChatServer {
 	 * @param message chat message
 	 */
 	async sendChat(message: string) {
-		// TODO: Implement Handle POST /message
+		if (this.user != null) {
+			var chat: Chat = {
+				type: "chat",
+				timestamp: Date.now(),
+				from: this.user.name,
+				message: message
+			}
+
+			var rsa = require('node-rsa')
+			var key = new rsa(this.user.private)
+
+			var chatString = JSON.stringify(chat)
+			var chatBuffer = Buffer.from(chatString)
+
+			var entity: Entity = {
+				object: chat,
+				signature: key.sign(chatBuffer).toString("hex")
+			}
+
+			OnionRoutingRequest(entity)
+		}
+
+		else {
+			throw new Error('dafok u doin')
+		}
 	}
 }
 
@@ -112,60 +203,4 @@ class ChatServer {
 export default function createChatServer() {
 	const chat = new ChatServer()
 	return chat.server
-}
-
-/**
- * Initializes a user's variables in the chat server.
- */
-function init() {
-	loadRSA()
-	createUserEntity()
-}
-
-/**
- * Loads the private and public key pair for a user.
- */
-function loadRSA() {
-	try {
-		var user = require("./data/user.json")
-
-		// Check if a private key does not exist
-		if (!user.hasOwnProperty("private")) {
-			// Generate new key pair
-			var rsa = require("node-rsa")
-			var keys = new rsa({ b: 256 })
-
-			keys.generateKeyPair()
-
-			var privateKey = keys.exportKey("pkcs8-private")
-			var publicKey = keys.exportKey("pkcs8-public")
-
-			// Prompt user for their name
-			var name = prompt("Enter your name: ")
-
-			// Save all new information into ./data.user.json
-			var newUser = { private: privateKey, public: publicKey, name: name }
-			var userString = JSON.stringify(newUser)
-
-			user.writeFile("./data/user.json", userString, function(err: Error) {
-				if (err) {
-					return console.error(err)
-				}
-				console.log("Saved new user information into './data/user/json'.")
-			})
-		}
-
-		var privateKey = user.private
-		var publicKey = user.public
-		var username = user.name
-	} catch (e) {
-		console.log("Error in loading user information...")
-	}
-}
-
-/**
- * Creates an Entity that is of type User with their name and public key.
- */
-function createUserEntity() {
-	// ...
 }

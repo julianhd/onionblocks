@@ -30,10 +30,10 @@ window.chat = {
 	},
 }
 
-// Usage example
-chat.login("thisguy")
-chat.sendChat("topkek")
-chat.onMessage(chat => {
-	const pretty = JSON.stringify(chat, null, "\t")
-	console.log(`Received chat ` + pretty)
-})
+// // Usage example
+// chat.login("thisguy")
+// chat.sendChat("topkek")
+// chat.onMessage(chat => {
+// 	const pretty = JSON.stringify(chat, null, "\t")
+// 	console.log(`Received chat ` + pretty)
+// })

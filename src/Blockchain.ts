@@ -21,6 +21,11 @@ export interface OnionNode {
 	public: string
 }
 
+export interface Entity {
+	object: BlockContent,
+	signature: string
+}
+
 export type BlockContent = Chat | User | OnionNode
 
 export interface BlockData<T extends BlockContent> {
