@@ -57,11 +57,14 @@ export default class Blockchain {
 				message: "wao",
 			},
 		}
-		const hash = createHash("sha256")
+		do {
+			const hash = createHash("sha256")
 		const serialization = JSON.stringify(data)
 		hash.update(serialization)
 		const digest = hash.digest("hex")
-		return [
+		
+		}
+		return 
 			{
 				data,
 				hash: digest,
