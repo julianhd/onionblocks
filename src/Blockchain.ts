@@ -43,7 +43,7 @@ export default class Blockchain {
 	constructor(private verifier: Verifier) {}
 
 	/**
-	 * Returns all the blocks from the Blockchain Server
+	 * Returns all the blocks from the blockchain server.
 	 */
 	async get(): Promise<Array<Block<BlockContent>>> {
 		const data: BlockData<Chat> = {
@@ -69,6 +69,11 @@ export default class Blockchain {
 		]
 	}
 
+	/**
+	 * Submits a new block to the blockchain server.
+	 *
+	 * @param block The block to be posted
+	 */
 	async post<T extends BlockContent>(block: Block<T>) {
 		const string = JSON.stringify(block, null, "\t")
 		console.log(`POST ${string}`)
