@@ -2,8 +2,9 @@ import http from "http"
 import fs from "fs"
 import NodeRSA from "node-rsa"
 
-import { OnionNode, BlockContent } from './Blockchain.ts';
-let BContent: BlockContent;
+var operating = require('os');
+
+import { OnionNode, BlockContent, Entity } from './Blockchain.ts';
 
 var rsa = new NodeRSA({ b: 256 })
 var serverPort = 8100
@@ -86,26 +87,20 @@ class Node implements OnionNode
 	host: string
 	public: string
 }
-export class Entity
-{
-  constructor(cont: BContent, sig: string){ 
-    this.content = cont; 
-    this.signature = sig;
-  }
-  content: BContent
-  signature: string
-}
 
 function timerRun() {
 	console.log("Created Entity");
   var host = "127.0.0.1";
   var timestamp = Date.now();
   
-  let node = new Node("127.0.0.1"); // TEMP till I find how to get server hostname
-  let entity = new Entity(node, "3236826");
+
+  var node : OnionNode = { type: "node", timestamp: Date.now(), host: operating.hostname(), public: rsa.exportKey("pkcs8-public") };
   
-  // ------------ TODO ------------
-  // Send Entity to OnionRouting
-  //Call OnionRouting.Request
+  var nodeString = JSON.stringify(node)
+  var nodeBuffer = Buffer.from(nodeString)
+  
+  var entity : Entity = { object: node, signature:rsa.sign(userBuffer).toString("hex") };
+  
+  OnionRoutingRequest(entity);
   
 }
