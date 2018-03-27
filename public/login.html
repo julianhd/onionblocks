@@ -40,13 +40,17 @@
         window.onsubmit = hit;
     }
 
-    function hit() {
+    async function hit() {
         event.preventDefault();
-        console.log('hit');
         //get the message SOMEHOW
         var pls = document.getElementById('username').value;
-        console.log(pls);
-        chat.login(pls);
+        try {
+            await chat.login(pls);
+            console.log(`Signed in as '${pls}'`)
+        } catch (error) {
+            // Login error occurred
+            console.error("Couldn't sign in!")
+        }
     }
 
 </script>
@@ -56,7 +60,8 @@
 
         <div class="msgLog">
             <h2>Login</h2>
-            <b>Username</b> <input type="text" id="username"  name="username">
+            <b>Username</b>
+            <input type="text" id="username" name="username">
             <button onclick="hit()">Login</button>
 
         </div>
