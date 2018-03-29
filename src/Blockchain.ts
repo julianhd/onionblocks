@@ -21,17 +21,18 @@ export interface OnionNode {
 	public: string
 }
 
-export interface Entity {
-	object: BlockContent,
-	signature: string
-}
-
 export type BlockContent = Chat | User | OnionNode
 
 export interface BlockData<T extends BlockContent> {
 	sequence: number
 	nonce: number
 	previous: string | null
+	signature: string
+	content: T
+}
+
+export interface Entity<T extends BlockContent> {
+	signature: string
 	content: T
 }
 
@@ -67,6 +68,7 @@ export default class Blockchain {
 			sequence: 0,
 			nonce: 0,
 			previous: null,
+			signature: "",
 			content: {
 				type: "chat",
 				timestamp: Date.now(),

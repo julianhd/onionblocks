@@ -1,16 +1,22 @@
 import http from "http"
 import express from "express"
 import WebSocket from "ws"
-import Blockchain, { Chat, Block, BlockContent, Entity, User } from "./Blockchain"
+import Blockchain, {
+	Chat,
+	Block,
+	BlockContent,
+	Entity,
+	User,
+} from "./Blockchain"
 import cors from "cors"
 
 /**
  * Dummy onion request function.
- * 
- * @param entity 
+ *
+ * @param entity
  */
-function OnionRoutingRequest(entity: Entity) {
-	console.log(entity);
+function OnionRoutingRequest(entity: Entity<any>) {
+	console.log(entity)
 }
 
 interface ServerUser extends User {
@@ -102,7 +108,7 @@ class ChatServer {
 	 * @param name username
 	 */
 	async register(name: string) {
-		var rsa = require('node-rsa')
+		var rsa = require("node-rsa")
 		var keys = new rsa({ b: 256 })
 
 		keys.generateKeyPair()
@@ -111,19 +117,19 @@ class ChatServer {
 		var publicKey = keys.exportKey("pkcs8-public")
 
 		// Save to a file
-		var fileSystem = require('fs')
+		var fileSystem = require("fs")
 		var filePath = "./data/" + name + ".json"
 
 		let userInfo = {
 			private: privateKey,
-			public: publicKey
+			public: publicKey,
 		}
 
 		var user: User = {
 			type: "user",
 			timestamp: Date.now(),
 			name: name,
-			public: publicKey
+			public: publicKey,
 		}
 
 		var serverUser: ServerUser = {
@@ -131,7 +137,7 @@ class ChatServer {
 			timestamp: Date.now(),
 			name: name,
 			private: privateKey,
-			public: publicKey
+			public: publicKey,
 		}
 
 		var data = JSON.stringify(serverUser, null, 2)
@@ -142,9 +148,9 @@ class ChatServer {
 		var userString = JSON.stringify(user)
 		var userBuffer = Buffer.from(userString)
 
-		var entity: Entity = {
-			object: user,
-			signature: keys.sign(userBuffer).toString("hex")
+		var entity: Entity<User> = {
+			content: user,
+			signature: keys.sign(userBuffer).toString("hex"),
 		}
 
 		OnionRoutingRequest(entity)
@@ -156,7 +162,7 @@ class ChatServer {
 	 * @param name username
 	 */
 	async login(name: string) {
-		var fileSystem = require('fs');
+		var fileSystem = require("fs")
 		var filePath = "./data/" + name + ".json"
 
 		let rawData = fileSystem.readFileSync(filePath)
@@ -174,25 +180,23 @@ class ChatServer {
 				type: "chat",
 				timestamp: Date.now(),
 				from: this.user.name,
-				message: message
+				message: message,
 			}
 
-			var rsa = require('node-rsa')
+			var rsa = require("node-rsa")
 			var key = new rsa(this.user.private)
 
 			var chatString = JSON.stringify(chat)
 			var chatBuffer = Buffer.from(chatString)
 
-			var entity: Entity = {
-				object: chat,
-				signature: key.sign(chatBuffer).toString("hex")
+			var entity: Entity<Chat> = {
+				content: chat,
+				signature: key.sign(chatBuffer).toString("hex"),
 			}
 
 			OnionRoutingRequest(entity)
-		}
-
-		else {
-			throw new Error('dafok u doin')
+		} else {
+			throw new Error("dafok u doin")
 		}
 	}
 }
