@@ -42,20 +42,35 @@ class ChatServer {
 		app.post("/register", async (req, res) => {
 			const { name } = req.query
 			console.log(`User '${name}' registering`)
-			await this.register(name)
-			res.end()
+			try {
+				await this.register(name)
+				res.end()
+			} catch (error) {
+				res.status(401).end()
+				throw error
+			}
 		})
 		app.post("/login", async (req, res) => {
 			const { name } = req.query
 			console.log(`User '${name}' logging in`)
-			await this.login(name)
-			res.end()
+			try {
+				await this.login(name)
+				res.end()
+			} catch (error) {
+				res.status(401).end()
+				throw error
+			}
 		})
 		app.post("/chat", async (req, res) => {
 			const { message } = req.query
 			console.log(`User sent message '${message}'`)
-			await this.sendChat(message)
-			res.end()
+			try {
+				await this.sendChat(message)
+				res.end()
+			} catch (error) {
+				res.status(401).end()
+				throw error
+			}
 		})
 		this.server = http.createServer(app)
 		const wss = new WebSocket.Server({ server: this.server })
@@ -193,6 +208,9 @@ class ChatServer {
 				content: chat,
 				signature: key.sign(chatBuffer).toString("hex"),
 			}
+
+			// TODO Remove this temporary hack
+			this.broadcastChat(chat)
 
 			OnionRoutingRequest(entity)
 		} else {

@@ -45,11 +45,12 @@
         //get the message SOMEHOW
         var pls = document.getElementById('username').value;
         try {
-            await chat.login(pls);
-            console.log(`Signed in as '${pls}'`)
+            await chat.register(pls);
+            console.log(`Registered as '${pls}'`)
+            window.location.assign("index.html");
         } catch (error) {
-            // Login error occurred
-            console.error("Couldn't sign in!")
+            // Register error occurred
+            console.error("Couldn't register!")
         }
     }
 
@@ -59,10 +60,10 @@
     <div class="main-flex-container">
 
         <div class="msgLog">
-            <h2>Login</h2>
+            <h2>Register</h2>
             <b>Username</b>
             <input type="text" id="username" name="username">
-            <button onclick="hit()">Login</button>
+            <button onclick="hit()">Register</button>
 
         </div>
 
