@@ -15,7 +15,7 @@ import cors from "cors"
  *
  * @param entity
  */
-function OnionRoutingRequest(entity: Entity) {
+function OnionRoutingRequest(entity: Entity<any>) {
 	console.log(entity)
 }
 
@@ -163,8 +163,8 @@ class ChatServer {
 		var userString = JSON.stringify(user)
 		var userBuffer = Buffer.from(userString)
 
-		var entity: Entity = {
-			object: user,
+		var entity: Entity<User> = {
+			content: user,
 			signature: keys.sign(userBuffer).toString("hex"),
 		}
 
@@ -204,8 +204,8 @@ class ChatServer {
 			var chatString = JSON.stringify(chat)
 			var chatBuffer = Buffer.from(chatString)
 
-			var entity: Entity = {
-				object: chat,
+			var entity: Entity<Chat> = {
+				content: chat,
 				signature: key.sign(chatBuffer).toString("hex"),
 			}
 
