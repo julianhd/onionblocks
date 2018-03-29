@@ -2,13 +2,25 @@ import { Verifier } from './Blockchain';
 import { createHash } from "crypto";
 import { BlockContent } from './Blockchain';
 import { Block } from './Blockchain';
+import NodeRSA from "node-rsa"
 
-var names: String[] = [];   // Keep track of all the names of users.
-var map: Map<String, String> = new Map<String, String>();   // Maps names - publickey.
 
 class BlockchainVerifier {
+    names: string[] = [];   // Keep track of all the names of users.
+    map: Map<string, string> = new Map<string, string>();   // Maps names - publickey.
+
+    // getPublicKey(name: String, blockchain: Array<Block<BlockContent>>) {
+    //     for (var block of blockchain) {
+    //         if (block.data.content.type == "user") {
+    //             return block.data.content.public;
+    //         }
+    //     }
+    //     throw console.error("User not found.");
+    // }
+
     verify(block: Block<BlockContent>, blockchain: Array<Block<BlockContent>>) {
-        var i:any;
+        var {names, map} = this
+        var i: any;
         var preseq = 0;
         if (block != null)
             preseq = block.data.sequence;
@@ -18,33 +30,40 @@ class BlockchainVerifier {
             const hash = createHash("sha256");
             hash.update(serialization);
             const digest = hash.digest("hex");
-            if (cur.hash.substring(0,4) !== "000")
+            if (cur.hash.substring(0, 4) !== "000")
                 throw console.error("The hash doesn't start with 000.");
             if (i == 0) {
                 if (block == null)
                     preseq = cur.data.sequence;
             }
-            else if (preseq != cur.data.sequence-1)
+            else if (preseq != cur.data.sequence - 1)
                 throw console.error("The sequence isn't exactly 1 greater than the previous block.");
             if (cur.data.content.type === "user") {
                 if (names.length == 0)
                     names.push(cur.data.content.name);
                 else {
-                    var j:any;
+                    var j: any;
                     for (j in names) {
                         if (names[j] === cur.data.content.name)
                             throw console.error("This user's name already exists.");
                     }
+                    names.push(cur.data.content.name);
                 }
                 map.set(cur.data.content.name, cur.data.content.public);
             }
             else if (cur.data.content.type === "chat") {
                 var publicKey = map.get(cur.data.content.from);
-                // What is the signature?
+                if (publicKey === undefined) {
+                    throw console.error("Public key not found.");
+                }
+                // var key = this.getPublicKey(cur.data.content.from, blockchain);
+                var string = JSON.stringify(cur.data.content);
+                var key = new NodeRSA(publicKey);
+                key.verify(string);
             }
             if (digest != cur.hash)
                 throw console.error("The calculated hash doesn't match the claimed hash.");
         }
-            
+
     }
 }
