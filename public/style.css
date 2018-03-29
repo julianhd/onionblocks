@@ -1,0 +1,184 @@
+div.container {
+	width: 60%;
+	margin: auto;
+}
+
+@font-face {
+	font-family: OpenSansBold;
+	src: url(OpenSans-Bold.ttf);
+}
+
+@font-face {
+	font-family: OpenSansRegular;
+	src: url(OpenSans-Regular.ttf);
+}
+
+body {
+	background-color: #f2f3f4;
+	font-family: OpenSansRegular;
+	font-size: 14px;
+}
+
+header,
+footer {
+	padding: 10px;
+	color: white;
+	background-color: #6410e2;
+	clear: left;
+	width: 60%;
+	margin: auto;
+}
+
+h2 {
+	font-family: OpenSansBold;
+}
+
+footer {
+	font-size: 12px;
+	text-align: center;
+}
+
+.msgLog {
+	max-height: 50vh;
+	margin: 10px;
+	padding: 10px;
+	width: auto;
+	overflow: auto;
+	color: rgb(0, 0, 0);
+	border: 1px solid #d6d9dc;
+	background-color: white;
+}
+
+.main-flex-container {
+	background-color: #e1d0fb;
+	display: flex;
+	padding: 10px;
+	margin: auto;
+	flex-direction: column;
+	width: 60%;
+	border: 1px solid #d6d9dc;
+}
+
+.main-flex-container > div {
+	align-content: center;
+}
+
+.header-flex-container {
+	display: flex;
+	flex-flow: row wrap;
+}
+
+.receiver-flex-container {
+	display: flex;
+	flex-flow: row wrap;
+	background-color: #f0e7fd;
+	padding: 10px;
+}
+
+.receiver-flex-container > div {
+	background-color: #f0e7fd;
+	margin: 5px;
+}
+
+.input-flex-container {
+	display: flex;
+	flex-flow: row;
+	background-color: #f0e7fd;
+}
+
+.input-flex-container > div {
+	background-color: #f0e7fd;
+	border: 0px solid black;
+}
+
+#textbox img {
+	margin: auto;
+}
+
+#textbox {
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+textarea,
+input,
+button {
+	padding: 10px;
+	margin: 5px;
+	resize: none;
+	border-radius: 50px;
+	font-family: Helvetica;
+}
+
+input,
+button {
+	background-color: #6410e2;
+	border: none;
+	color: white;
+	text-align: center;
+	text-decoration: none;
+}
+
+textarea:focus,
+input:focus {
+	outline: none;
+}
+
+input[type="text"] {
+	background-color: white;
+	color: black;
+	border: 1px solid rgb(169, 169, 169);
+	text-align: left;
+}
+
+textarea {
+	width: calc(50vw - 70px); /* calc and viewport to the rescue */
+}
+
+/* width */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+/***** scrollbar ******/
+/* Track */
+::-webkit-scrollbar-track {
+	background: #eeeeee;
+	margin-right: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: #b488f7;
+	border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: #9658f3;
+}
+
+/* nav menu */
+ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+li {
+	float: left;
+}
+
+li a {
+	display: block;
+	color: white;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	font-family: OpenSansBold;
+}
+
+li a:hover {
+	color: #ff661a;
+}
