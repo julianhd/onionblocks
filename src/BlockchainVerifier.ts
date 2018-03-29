@@ -59,7 +59,10 @@ class BlockchainVerifier {
                 // var key = this.getPublicKey(cur.data.content.from, blockchain);
                 var string = JSON.stringify(cur.data.content);
                 var key = new NodeRSA(publicKey);
-                key.verify(string);
+                var buffer = new Buffer(string);
+                var base64String = buffer.toString('base64') as NodeRSA.Data;
+                if (!key.verify(base64String, cur.data.signature, undefined, 'base64'))
+                    throw console.error("Invalid signature.");
             }
             if (digest != cur.hash)
                 throw console.error("The calculated hash doesn't match the claimed hash.");
