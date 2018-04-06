@@ -3,7 +3,7 @@ import createChatServer from "./ChatServer"
 import createBlockChainServer from "./BlockChainServer"
 import createPeerNodeServer from "./PeerNodeServer"
 
-const NODE_COUNT = 5
+const NODE_COUNT = 1
 const NODE_SERVER_RANGE = 8100
 
 const staticServer = createStaticServer()

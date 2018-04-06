@@ -74,7 +74,7 @@ export default class Blockchain {
 	 */
 	async get(): Promise<Array<Block<BlockContent>>> {
 		const response = await got(
-			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain`,
+			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain?since=0`,
 		)
 		const blockchain: Array<Block<BlockContent>> = JSON.parse(response.body)
 		return blockchain

@@ -18,7 +18,7 @@ While progressively decrypting the message
 */
 class PeerNodeServer {
 	public readonly server: http.Server
-	rsa: NodeRSA = new NodeRSA({ b: 256 })
+	private rsa: NodeRSA = new NodeRSA({ b: 256 })
 
 	constructor(private serverPort: number) {
 		this.init()
@@ -66,9 +66,10 @@ class PeerNodeServer {
 		var fileName = "./data/onion" + this.serverPort + ".json"
 		fs.exists(fileName, exists => {
 			if (exists) {
-				console.log("JSON exists, loading keys...")
+				console.log("JSON exists, loading " + fileName)
 				//Load RSA files
-				const keys = JSON.parse(fs.readFileSync(fileName, "utf8"))
+				const str = fs.readFileSync(fileName, "utf8")
+				const keys = JSON.parse(str)
 
 				this.rsa.importKey(keys["public"], "pkcs8-public")
 				this.rsa.importKey(keys["private"], "pkcs8-private")
@@ -81,27 +82,23 @@ class PeerNodeServer {
 				this.rsa.generateKeyPair()
 				var publicKey = this.rsa.exportKey("pkcs8-public") //export public key
 				var privateKey = this.rsa.exportKey("pkcs8-private") //export private key
-				console.log("First key pair")
+				console.log("Generated key pair")
 				console.log("----------------------------")
 
 				const keys = { public: publicKey, private: privateKey }
 				var jsonString = JSON.stringify(keys)
 
 				//Create RSA key JSON file
-				fs.writeFile(fileName, jsonString, function(err) {
-					if (err) {
-						return console.log(err)
-					}
-
-					console.log("Keys generated.")
-				})
+				fs.writeFileSync(fileName, jsonString)
 			}
 		})
+
+		this.timerRun()
 
 		setInterval(this.timerRun, 30000)
 	}
 
-	timerRun() {
+	timerRun = async () => {
 		console.log("Created Entity")
 		const node: OnionNode = {
 			type: "node",
@@ -111,6 +108,7 @@ class PeerNodeServer {
 		}
 
 		const nodeString = JSON.stringify(node)
+		console.log(nodeString)
 		const nodeBuffer = Buffer.from(nodeString)
 
 		const entity: Entity<OnionNode> = {
@@ -118,7 +116,10 @@ class PeerNodeServer {
 			signature: this.rsa.sign(nodeBuffer).toString("hex"),
 		}
 
-		onionRouteRequest(entity)
+		const miner = new Miner()
+		const block = await miner.mine(entity)
+		const blockchain = new Blockchain(null)
+		await blockchain.post(block)
 	}
 }
 
