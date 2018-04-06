@@ -63,7 +63,7 @@ class PeerNodeServer {
 	}
 
 	init() {
-		var fileName = "onion" + this.serverPort + ".json"
+		var fileName = "./data/onion" + this.serverPort + ".json"
 		fs.exists(fileName, exists => {
 			if (exists) {
 				console.log("JSON exists, loading keys...")
