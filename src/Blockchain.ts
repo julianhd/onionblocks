@@ -1,4 +1,8 @@
 import { createHash } from "crypto"
+import got from "got"
+
+const MASTER_HOST = "127.0.0.1"
+const MASTER_PORT = 8082
 
 export interface Chat {
 	type: "chat"
@@ -69,28 +73,11 @@ export default class Blockchain {
 	 * Returns all the blocks from the blockchain server.
 	 */
 	async get(): Promise<Array<Block<BlockContent>>> {
-		const data: BlockData<Chat> = {
-			sequence: 0,
-			nonce: 0,
-			previous: null,
-			signature: "",
-			content: {
-				type: "chat",
-				timestamp: Date.now(),
-				from: "johnny",
-				message: "wao",
-			},
-		}
-		const hash = createHash("sha256")
-		const serialization = JSON.stringify(data)
-		hash.update(serialization)
-		const digest = hash.digest("hex")
-		return [
-			{
-				data,
-				hash: digest,
-			},
-		]
+		const response = await got(
+			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain`,
+		)
+		const blockchain: Array<Block<BlockContent>> = JSON.parse(response.body)
+		return blockchain
 	}
 
 	/**
@@ -99,7 +86,10 @@ export default class Blockchain {
 	 * @param block The block to be posted
 	 */
 	async post<T extends BlockContent>(block: Block<T>) {
-		const string = JSON.stringify(block, null, "\t")
-		console.log(`POST ${string}`)
+		const data = JSON.stringify(block)
+		await got(`http://${MASTER_HOST}:${MASTER_PORT}/block`, {
+			method: "POST",
+			body: data,
+		})
 	}
 }

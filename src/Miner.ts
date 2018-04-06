@@ -1,12 +1,17 @@
 import http from "http"
 import express from "express"
-import Blockchain, { BlockData, Block, BlockContent } from "./Blockchain"
+import Blockchain, {
+	BlockData,
+	Block,
+	BlockContent,
+	Entity,
+} from "./Blockchain"
 import { createHash } from "crypto"
 
 const app = express()
 
-class Miner {
-	async mine(content: BlockContent) {
+export default class Miner {
+	async mine(entity: Entity<any>) {
 		// get the current blockchain
 		const blockchain = new Blockchain(null) // will have Verifier once it is created
 		const blocks = await blockchain.get()
@@ -18,8 +23,8 @@ class Miner {
 			sequence: previous_block.data.sequence + 1, // set the sequence field > 1 than the previous one
 			nonce: 0,
 			previous: previous_block.hash,
-			signature: "", // TODO FIX
-			content: content,
+			signature: entity.signature, // TODO FIX
+			content: entity.content,
 		}
 		var valid_hash = false
 		var miner_hash

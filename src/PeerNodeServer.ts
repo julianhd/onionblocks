@@ -6,9 +6,10 @@ import cors from "cors"
 import os from "os"
 import got from "got"
 
-import { OnionNode, BlockContent, Entity } from "./Blockchain"
+import Blockchain, { OnionNode, BlockContent, Entity } from "./Blockchain"
 import { Request, Relay, Exit } from "./request"
 import onionRouteRequest from "./onionRouteRequest"
+import Miner from "./Miner"
 
 /**
 The PeerNode Server,
@@ -46,6 +47,10 @@ class PeerNodeServer {
 						body: data,
 					})
 				} else if (decryptedMessage.type == "exit") {
+					const miner = new Miner()
+					const block = await miner.mine(decryptedMessage.content)
+					const blockchain = new Blockchain(null)
+					await blockchain.post(block)
 				}
 				res.end()
 			} catch (error) {
