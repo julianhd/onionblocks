@@ -72,6 +72,5 @@ function encrypt(o: Object, node: OnionNode) {
 	key.importKey(node.public, "pkcs8-public")
 	const data = JSON.stringify(o)
 	const buffer = new Buffer(data)
-	const encrypted = key.encrypt(buffer)
-	return encrypted.toString("base64")
+	return key.encrypt(buffer, "base64")
 }

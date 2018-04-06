@@ -9,15 +9,7 @@ import Blockchain, {
 	User,
 } from "./Blockchain"
 import cors from "cors"
-
-/**
- * Dummy onion request function.
- *
- * @param entity
- */
-function OnionRoutingRequest(entity: Entity<any>) {
-	console.log(entity)
-}
+import onionRouteRequest from "./onionRouteRequest"
 
 interface ServerUser extends User {
 	private: string
@@ -168,7 +160,7 @@ class ChatServer {
 			signature: keys.sign(userBuffer).toString("hex"),
 		}
 
-		OnionRoutingRequest(entity)
+		await onionRouteRequest(entity)
 	}
 
 	/**
@@ -212,7 +204,7 @@ class ChatServer {
 			// TODO Remove this temporary hack
 			this.broadcastChat(chat)
 
-			OnionRoutingRequest(entity)
+			await onionRouteRequest(entity)
 		} else {
 			throw new Error("dafok u doin")
 		}
