@@ -34,7 +34,7 @@ class PeerNodeServer {
 					requestMessage.encrypted,
 					"json",
 				)
-				console.log("PeerNodeServer: post decryptedMessage -- " + JSON.stringify(decryptedMessage));
+				console.log("PeerNodeServer: post decryptedMessage");
 
 				if (decryptedMessage.type == "relay") {
 					// ------ TO BE TESTED --------
@@ -45,7 +45,7 @@ class PeerNodeServer {
 					await got(`http://${decryptedMessage.next}/request`, {
 						method: "POST",
 						json: true,
-						body: req,
+						body: nextRequest,
 					})
 
 				} else if (decryptedMessage.type == "exit") {
