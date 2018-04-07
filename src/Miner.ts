@@ -23,12 +23,13 @@ export default class Miner {
 		if (previous_block) {
 			sequence_num = previous_block.data.sequence + 1;
 		}
-
+		// console.log(previous_block);
 		// create a new block data
 		const new_block_data: BlockData<BlockContent> = {
 			uuid: uuidv4(),
 			sequence: sequence_num, // set the sequence field > 1 than the previous one
 			nonce: 0,
+			previous_uuid: (previous_block) ? previous_block.data.uuid : null,
 			previous: (previous_block) ? previous_block.hash : null,
 			signature: entity.signature, // TODO FIX
 			content: entity.content,

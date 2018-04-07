@@ -24,7 +24,7 @@ for (let i = 0; i < NODE_COUNT; i++) {
 		setTimeout(function () {
 			const nodeServer = createPeerNodeServer(port)
 			nodeServer.listen(port, "127.0.0.1")
-		}, Math.floor(Math.random() * 100));
+		}, Math.floor(Math.random() * 1000));
 	})(port);
 
 

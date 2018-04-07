@@ -63,11 +63,17 @@ export default class BlockchainTree {
     }
   }
 
+  private updateParentChild(pos: number, childPos: number) {
+    if (pos >= 0) {
+      this.struct.nodeList[pos].child.push(childPos);
+    }
+  }
+
   /**
    * Adds a new block to the blockchain tree.
    *
    * @param {Block} block : Block to add to the chatString
-   * @throws {Error} If the block's UUID exists
+   * @throws {Error} If the block's UUID exists or parent is invalid
    */
   addBlock(block: Block<BlockContent>) {
       this.validateBlock(block);
@@ -75,13 +81,21 @@ export default class BlockchainTree {
       if (this.uuidExists(block.data.uuid)) {
         throw new Error("Block exists in this struct: Existing UUID");
       }
+      // console.log(block.data.previous_uuid);
+      let parentPos = (block.data.previous_uuid) ? this.getUUIDPos(block.data.previous_uuid) : -1;
+      if (parentPos == undefined) {
+        throw new Error("Invalid parent");
+      }
+
       let pos = this.struct.blockchain.length;
       this.struct.blockchain[pos] = block;
       this.struct.nodeList[pos] = {
         position : pos,
-        parent : pos - 1,
+        parent : parentPos,
         child : [],
       };
+      this.updateParentChild(parentPos, pos);
+
       this.struct.uuidMap[block.data.uuid] = pos;
   }
 
@@ -143,6 +157,18 @@ export default class BlockchainTree {
     }
 
     return chaindetails;
+  }
+
+  // TODO change to the real toString .. no time
+  displayNicely() {
+    var chainStrList: Array<string> = [];
+    this.struct.blockchain.forEach(function (block) {
+      chainStrList.push("uuid: " + block.data.uuid + ", previous_uuid: " + block.data.previous_uuid + ", sequence: " + block.data.sequence + "\n");
+    })
+    var nodeStrList = JSON.stringify(this.struct.nodeList);
+    var str = `blockchain:\n ${chainStrList}||\nnodeList:\n ${nodeStrList}`;
+    console.log("Displaying tree");
+    console.log(str);
   }
 
   // getRouteFromNodeToRoot(uuid: string) {

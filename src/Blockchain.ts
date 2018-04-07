@@ -33,6 +33,7 @@ export interface BlockData<T extends BlockContent> {
 	sequence: number
 	nonce: number
 	previous: string | null
+	previous_uuid: string | null
 	signature: string
 	content: T
 }
@@ -76,7 +77,7 @@ export default class Blockchain {
 	 */
 	async get(): Promise<Array<Block<BlockContent>>> {
 		const response = await got(
-			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain?since=-1`,
+			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain`,
 		)
 		const blocktree: BlockchainTreeStruct = JSON.parse(response.body);
 		const blockchain: Array<Block<BlockContent>> = blocktree.blockchain;

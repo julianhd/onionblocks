@@ -77,7 +77,7 @@ class BlockChainServer {
       // console.log(err);
       return false;
     }
-    // console.log(this.blockChain);
+    this.blockTree.displayNicely();
     return true;
   }
 }
