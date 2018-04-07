@@ -2,7 +2,7 @@ import http from "http"
 import express from "express"
 import bodyParser from "body-parser"
 import { Block, BlockContent } from "./Blockchain"
-import BlockChainVerifier from "./BlockchainVerifierDummy"
+import BlockchainVerifier from "./BlockchainVerifier"
 
 
 /**
@@ -17,6 +17,7 @@ import BlockChainVerifier from "./BlockchainVerifierDummy"
  */
 class BlockChainServer {
   private blockChain: Array<Block<BlockContent>>;
+  private verifier: BlockchainVerifier;
 
   server: http.Server;
 
@@ -25,10 +26,12 @@ class BlockChainServer {
    */
   constructor() {
     this.blockChain = [];
+    this.verifier = new BlockchainVerifier();
 
     const app = express();
     app.use(bodyParser.json());
     app.post('/block', (req, res) => {
+      // console.log("BlockchainServer: request post " + JSON.stringify(req.body));
       var status;
       if (!req.body || !this.addBlock(req.body)) {
         status = 400;
@@ -65,7 +68,7 @@ class BlockChainServer {
 
     try {
       var lastBlock = (this.blockChain.length > 0) ? this.blockChain[this.blockChain.length - 1] : null;
-      BlockChainVerifier.verify(lastBlock, [block]);
+      this.verifier.verify(lastBlock, [block]);
     } catch (err) {
       console.log("BlockChain Verify failed");
       console.log(err);
