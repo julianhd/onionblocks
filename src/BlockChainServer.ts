@@ -42,7 +42,7 @@ class BlockChainServer {
     });
 
     app.get('/blockchain', (req, res) => {
-      console.log(req.query);
+      // console.log(req.query);
       var since = parseInt(req.query.since);
       if (!Number.isInteger(since)) {
         return res.sendStatus(400);
@@ -64,18 +64,18 @@ class BlockChainServer {
    * @returns {Boolean} true if the block was successfully added, false on verification error.
    */
   private addBlock(block: Block<BlockContent>) {
-    console.log("New Block\n " + JSON.stringify(block));
+    // console.log("New Block\n " + JSON.stringify(block));
 
     try {
       var lastBlock = (this.blockChain.length > 0) ? this.blockChain[this.blockChain.length - 1] : null;
       this.verifier.verify(lastBlock, [block]);
     } catch (err) {
-      console.log("BlockChain Verify failed");
-      console.log(err);
+      // console.log("BlockChain Verify failed");
+      // console.log(err);
       return false;
     }
     this.blockChain.push(block);
-    console.log(this.blockChain);
+    // console.log(this.blockChain);
     return true;
   }
 

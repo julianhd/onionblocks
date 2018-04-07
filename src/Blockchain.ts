@@ -77,6 +77,8 @@ export default class Blockchain {
 			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain?since=-1`,
 		)
 		const blockchain: Array<Block<BlockContent>> = JSON.parse(response.body)
+
+		// console.log("Blockchain: get -- " + JSON.stringify(blockchain));
 		return blockchain
 	}
 
