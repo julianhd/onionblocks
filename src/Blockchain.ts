@@ -1,4 +1,9 @@
 import { createHash } from "crypto"
+import got from "got"
+import BlockchainTree, {BlockchainTreeStruct, TreeNode, UUIDMap} from "./BlockTree"
+
+const MASTER_HOST = "127.0.0.1"
+const MASTER_PORT = 8082
 
 export interface Chat {
 	type: "chat"
@@ -18,15 +23,18 @@ export interface OnionNode {
 	type: "node"
 	timestamp: number
 	host: string
+	port: number
 	public: string
 }
 
 export type BlockContent = Chat | User | OnionNode
 
 export interface BlockData<T extends BlockContent> {
+	uuid: string
 	sequence: number
 	nonce: number
 	previous: string | null
+	previous_uuid: string | null
 	signature: string
 	content: T
 }
@@ -42,7 +50,10 @@ export interface Block<T extends BlockContent> {
 }
 
 export interface Verifier {
-	verify(block: Block<BlockContent>, blockchain: Array<Block<BlockContent>>): void
+	verify(
+		block: Block<BlockContent>,
+		blockchain: Array<Block<BlockContent>>,
+	): void
 }
 
 export type BlockHandlerCallback = (block: Block<BlockContent>) => void
@@ -50,12 +61,14 @@ export type BlockHandlerCallback = (block: Block<BlockContent>) => void
 export default class Blockchain {
 	constructor(
 		private verifier: Verifier | null,
-		private callback: BlockHandlerCallback,
+		private callback?: BlockHandlerCallback,
 	) {
 		process.nextTick(async () => {
 			const blocks = await this.get()
-			for (const block of blocks) {
-				callback(block)
+			if (callback != null) {
+				for (const block of blocks) {
+					callback(block)
+				}
 			}
 		})
 	}
@@ -64,28 +77,14 @@ export default class Blockchain {
 	 * Returns all the blocks from the blockchain server.
 	 */
 	async get(): Promise<Array<Block<BlockContent>>> {
-		const data: BlockData<Chat> = {
-			sequence: 0,
-			nonce: 0,
-			previous: null,
-			signature: "",
-			content: {
-				type: "chat",
-				timestamp: Date.now(),
-				from: "johnny",
-				message: "wao",
-			},
-		}
-		const hash = createHash("sha256")
-		const serialization = JSON.stringify(data)
-		hash.update(serialization)
-		const digest = hash.digest("hex")
-		return [
-			{
-				data,
-				hash: digest,
-			},
-		]
+		const response = await got(
+			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain`,
+		)
+		const blocktree: BlockchainTreeStruct = JSON.parse(response.body);
+		const blockchain: Array<Block<BlockContent>> = blocktree.blockchain;
+
+		// console.log("Blockchain: get -- " + JSON.stringify(blockchain));
+		return blockchain
 	}
 
 	/**
@@ -94,7 +93,11 @@ export default class Blockchain {
 	 * @param block The block to be posted
 	 */
 	async post<T extends BlockContent>(block: Block<T>) {
-		const string = JSON.stringify(block, null, "\t")
-		console.log(`POST ${string}`)
+		// console.log("Blockchain: posting a new block");
+		await got(`http://${MASTER_HOST}:${MASTER_PORT}/block`, {
+			method: "POST",
+			body: block,
+			json: true
+		})
 	}
 }

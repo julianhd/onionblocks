@@ -2,7 +2,8 @@ import http from "http"
 import express from "express"
 import bodyParser from "body-parser"
 import { Block, BlockContent } from "./Blockchain"
-import BlockChainVerifier from "./BlockchainVerifierDummy"
+import BlockchainVerifier from "./BlockchainVerifier"
+import BlockchainTree from "./BlockTree"
 
 
 /**
@@ -16,7 +17,9 @@ import BlockChainVerifier from "./BlockchainVerifierDummy"
  * The server uses the express module with the JSON bodyParser middleware
  */
 class BlockChainServer {
-  private blockChain: Array<Block<BlockContent>>;
+  // private blockChain: Array<Block<BlockContent>>;
+  private blockTree: BlockchainTree;
+  private verifier: BlockchainVerifier;
 
   server: http.Server;
 
@@ -24,28 +27,29 @@ class BlockChainServer {
    * Create a new blockchain Server.
    */
   constructor() {
-    this.blockChain = [];
+    this.blockTree = new BlockchainTree();
+    this.verifier = new BlockchainVerifier();
 
     const app = express();
     app.use(bodyParser.json());
     app.post('/block', (req, res) => {
+      // console.log("BlockchainServer: request post " + JSON.stringify(req.body));
       var status;
       if (!req.body || !this.addBlock(req.body)) {
         status = 400;
       } else {
         status = 200;
       }
-      return res.sendStatus(status);
+      return res.status(status).json({});
     });
 
     app.get('/blockchain', (req, res) => {
-      console.log(req.query);
-      var since = parseInt(req.query.since);
-      if (!Number.isInteger(since)) {
-        return res.sendStatus(400);
+      // console.log(req.query);
+      var since = req.query.since;
+      if (!since) {
+        res.json(this.blockTree.getStruct());
       } else {
-        // get chain from since exclusive
-        res.json(this.getBlockchain(since + 1));
+        res.json(this.blockTree.getChainSince(since));
       }
     });
 
@@ -61,29 +65,20 @@ class BlockChainServer {
    * @returns {Boolean} true if the block was successfully added, false on verification error.
    */
   private addBlock(block: Block<BlockContent>) {
-    console.log("New Block\n " + JSON.stringify(block));
+    // console.log("New Block\n " + JSON.stringify(block));
 
     try {
-      var lastBlock = (this.blockChain.length > 0) ? this.blockChain[this.blockChain.length - 1] : null;
-      BlockChainVerifier.verify(lastBlock, [block]);
+      let lastBlock = this.blockTree.getHead();
+      // TODO add this when modified
+      // this.verifier.verify(lastBlock, [block]);
+      this.blockTree.addBlock(block);
     } catch (err) {
-      console.log("BlockChain Verify failed");
-      console.log(err);
+      // console.log("BlockChain Verify failed");
+      // console.log(err);
       return false;
     }
-    this.blockChain.push(block);
-    console.log(this.blockChain);
+    this.blockTree.displayNicely();
     return true;
-  }
-
-  /**
-   * Returns the blockchain as an array starting at index start (inclusive)
-   *
-   * @param {Number} start : First block to return in the blockChain
-   * @returns {Array{Block}} Blockchain as an array from start
-   */
-  private getBlockchain(start : number) {
-    return this.blockChain.slice(start);
   }
 }
 
