@@ -94,7 +94,6 @@ export default class Blockchain {
 	 */
 	async post<T extends BlockContent>(block: Block<T>) {
 		// console.log("Blockchain: posting a new block");
-		const data = JSON.stringify(block)
 		await got(`http://${MASTER_HOST}:${MASTER_PORT}/block`, {
 			method: "POST",
 			body: block,
