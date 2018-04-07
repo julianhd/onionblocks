@@ -119,7 +119,11 @@ class PeerNodeServer {
 		const miner = new Miner()
 		const block = await miner.mine(entity)
 		const blockchain = new Blockchain(null)
-		await blockchain.post(block)
+		try {
+			await blockchain.post(block)
+		} catch (err) {
+			console.log("PeerNodeServer: Unable to post the block -- " + JSON.stringify(err));
+		}
 	}
 }
 
