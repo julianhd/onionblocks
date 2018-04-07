@@ -159,7 +159,6 @@ class ChatServer {
 			content: user,
 			signature: keys.sign(userBuffer).toString("hex"),
 		}
-
 		await onionRouteRequest(entity)
 	}
 
@@ -206,7 +205,7 @@ class ChatServer {
 
 			await onionRouteRequest(entity)
 		} else {
-			throw new Error("dafok u doin")
+			throw new Error("Username is invalid")
 		}
 	}
 }
