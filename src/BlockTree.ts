@@ -163,7 +163,7 @@ export default class BlockchainTree {
   displayNicely() {
     var chainStrList: Array<string> = [];
     this.struct.blockchain.forEach(function (block) {
-      chainStrList.push("uuid: " + block.data.uuid + ", previous_uuid: " + block.data.previous_uuid + ", sequence: " + block.data.sequence + "\n");
+      chainStrList.push("type: " + block.data.content.type + ", uuid: " + block.data.uuid + ", previous_uuid: " + block.data.previous_uuid + ", sequence: " + block.data.sequence + "\n");
     })
     var nodeStrList = JSON.stringify(this.struct.nodeList);
     var str = `blockchain:\n ${chainStrList}||\nnodeList:\n ${nodeStrList}`;

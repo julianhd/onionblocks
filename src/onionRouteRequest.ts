@@ -23,19 +23,21 @@ export default async function onionRouteRequest<T extends BlockContent>(
 	}
 	const r3 = encrypt(exit, n3)
 
-	const r2 = encryptRelay(n3.host, r3, n2)
+	const r2 = encryptRelay(`${n3.host}:${n3.port}`, r3, n2)
 
-	const r1 = encryptRelay(n2.host, r2, n1)
+	const r1 = encryptRelay(`${n2.host}:${n2.port}`, r2, n1)
 
 	const req: Request = {
 		encrypted: r1,
 	}
 	const data = JSON.stringify(req)
 
-	await got(`http://${n1.host}/request`, {
+	console.log("onionRouteRequest: sending request -- " + JSON.stringify(n1));
+	await got(`http://${n1.host}:${n1.port}/request`, {
 		method: "POST",
 		body: data,
 	})
+	console.log("OnionRouteQuest: sent first request");
 }
 
 function* chooseRoutingNodes(blocks: Array<Block<BlockContent>>) {

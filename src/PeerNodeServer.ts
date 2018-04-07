@@ -18,7 +18,7 @@ While progressively decrypting the message
 */
 class PeerNodeServer {
 	public readonly server: http.Server
-	private rsa: NodeRSA = new NodeRSA({ b: 256 })
+	private rsa: NodeRSA = new NodeRSA({ b: 512 })
 
 	constructor(private serverPort: number) {
 		this.init()
@@ -28,12 +28,14 @@ class PeerNodeServer {
 
 		// Handle POST requests
 		app.post("/request", async (req, res) => {
+			console.log("PeerNodeServer: New Request")
 			try {
 				const requestMessage: Request = JSON.parse(req.body)
 				const decryptedMessage: Relay | Exit<any> = this.rsa.decrypt(
 					requestMessage.encrypted,
 					"json",
 				)
+				console.log("PeerNodeServer: post decryptedMessage -- " + JSON.stringify(decryptedMessage));
 
 				if (decryptedMessage.type == "relay") {
 					// ------ TO BE TESTED --------
@@ -98,17 +100,20 @@ class PeerNodeServer {
 		setInterval(this.timerRun, 30000)
 	}
 
+
 	timerRun = async () => {
-		console.log("Created Entity")
+			console.log("port " + this.serverPort);
+		// console.log("Created Entity")
 		const node: OnionNode = {
 			type: "node",
 			timestamp: Date.now(),
 			host: os.hostname(),
+			port: this.serverPort,
 			public: this.rsa.exportKey("pkcs8-public"),
 		}
 
 		const nodeString = JSON.stringify(node)
-		console.log(nodeString)
+		// console.log(nodeString)
 		const nodeBuffer = Buffer.from(nodeString)
 
 		const entity: Entity<OnionNode> = {

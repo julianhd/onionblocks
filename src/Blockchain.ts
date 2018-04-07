@@ -23,6 +23,7 @@ export interface OnionNode {
 	type: "node"
 	timestamp: number
 	host: string
+	port: number
 	public: string
 }
 
