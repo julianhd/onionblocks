@@ -1,5 +1,6 @@
 import { createHash } from "crypto"
 import got from "got"
+import BlockchainTree, {BlockchainTreeStruct, TreeNode, UUIDMap} from "./BlockTree"
 
 const MASTER_HOST = "127.0.0.1"
 const MASTER_PORT = 8082
@@ -28,6 +29,7 @@ export interface OnionNode {
 export type BlockContent = Chat | User | OnionNode
 
 export interface BlockData<T extends BlockContent> {
+	uuid: string
 	sequence: number
 	nonce: number
 	previous: string | null
@@ -76,7 +78,8 @@ export default class Blockchain {
 		const response = await got(
 			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain?since=-1`,
 		)
-		const blockchain: Array<Block<BlockContent>> = JSON.parse(response.body)
+		const blocktree: BlockchainTreeStruct = JSON.parse(response.body);
+		const blockchain: Array<Block<BlockContent>> = blocktree.blockchain;
 
 		// console.log("Blockchain: get -- " + JSON.stringify(blockchain));
 		return blockchain

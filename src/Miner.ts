@@ -7,6 +7,7 @@ import Blockchain, {
 	Entity,
 } from "./Blockchain"
 import { createHash } from "crypto"
+import uuidv4 from "uuid/v4"
 
 const app = express()
 
@@ -25,6 +26,7 @@ export default class Miner {
 
 		// create a new block data
 		const new_block_data: BlockData<BlockContent> = {
+			uuid: uuidv4(),
 			sequence: sequence_num, // set the sequence field > 1 than the previous one
 			nonce: 0,
 			previous: (previous_block) ? previous_block.hash : null,

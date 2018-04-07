@@ -3,6 +3,7 @@ import express from "express"
 import bodyParser from "body-parser"
 import { Block, BlockContent } from "./Blockchain"
 import BlockchainVerifier from "./BlockchainVerifier"
+import BlockchainTree from "./BlockTree"
 
 
 /**
@@ -16,7 +17,8 @@ import BlockchainVerifier from "./BlockchainVerifier"
  * The server uses the express module with the JSON bodyParser middleware
  */
 class BlockChainServer {
-  private blockChain: Array<Block<BlockContent>>;
+  // private blockChain: Array<Block<BlockContent>>;
+  private blockTree: BlockchainTree;
   private verifier: BlockchainVerifier;
 
   server: http.Server;
@@ -25,7 +27,7 @@ class BlockChainServer {
    * Create a new blockchain Server.
    */
   constructor() {
-    this.blockChain = [];
+    this.blockTree = new BlockchainTree();
     this.verifier = new BlockchainVerifier();
 
     const app = express();
@@ -38,17 +40,16 @@ class BlockChainServer {
       } else {
         status = 200;
       }
-      return res.sendStatus(status);
+      return res.status(status).json({});
     });
 
     app.get('/blockchain', (req, res) => {
       // console.log(req.query);
-      var since = parseInt(req.query.since);
-      if (!Number.isInteger(since)) {
-        return res.sendStatus(400);
+      var since = req.query.since;
+      if (!since) {
+        res.json(this.blockTree.getStruct());
       } else {
-        // get chain from since exclusive
-        res.json(this.getBlockchain(since + 1));
+        res.json(this.blockTree.getChainSince(since));
       }
     });
 
@@ -67,26 +68,17 @@ class BlockChainServer {
     // console.log("New Block\n " + JSON.stringify(block));
 
     try {
-      var lastBlock = (this.blockChain.length > 0) ? this.blockChain[this.blockChain.length - 1] : null;
-      this.verifier.verify(lastBlock, [block]);
+      let lastBlock = this.blockTree.getHead();
+      // TODO add this when modified
+      // this.verifier.verify(lastBlock, [block]);
+      this.blockTree.addBlock(block);
     } catch (err) {
       // console.log("BlockChain Verify failed");
       // console.log(err);
       return false;
     }
-    this.blockChain.push(block);
     // console.log(this.blockChain);
     return true;
-  }
-
-  /**
-   * Returns the blockchain as an array starting at index start (inclusive)
-   *
-   * @param {Number} start : First block to return in the blockChain
-   * @returns {Array{Block}} Blockchain as an array from start
-   */
-  private getBlockchain(start : number) {
-    return this.blockChain.slice(start);
   }
 }
 
