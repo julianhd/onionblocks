@@ -19,11 +19,16 @@ export default class BlockchainVerifier {
     // }
 
     verify(block: Block<BlockContent> | null, blockchain: Array<Block<BlockContent>>) {
+        // console.log("BlochainVerifier: block -- " + JSON.stringify(block));
+        // console.log();
+        // console.log("BlockchainVerifier: blockchain -- " + JSON.stringify(blockchain));
+
         var {names, map} = this
         var i: any;
-        var preseq = 0;
-        if (block != null)
+        var preseq = -1;
+        if (block != null) {
             preseq = block.data.sequence;
+        }
         for (i in blockchain) {
             var cur = blockchain[i];
             const serialization = JSON.stringify(cur.data);
@@ -32,12 +37,16 @@ export default class BlockchainVerifier {
             const digest = hash.digest("hex");
             if (cur.hash.substring(0, 3) !== "000")
                 throw console.error("The hash doesn't start with 000.");
-            if (i == 0) {
-                if (block == null)
-                    preseq = cur.data.sequence;
-            }
-            else if (preseq != cur.data.sequence - 1)
+            // if (i == 0) {
+            //     if (block == null) {
+            //         preseq = cur.data.sequence;
+            //     }
+            // }
+            if (preseq != cur.data.sequence - 1) {
                 throw console.error("The sequence isn't exactly 1 greater than the previous block.");
+            }
+            preseq++;
+
             if (cur.data.content.type === "user") {
                 if (names.length == 0)
                     names.push(cur.data.content.name);
