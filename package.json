@@ -45,6 +45,7 @@
 		"got": "^8.3.0",
 		"node-rsa": "^0.4.2",
 		"serve-static": "^1.13.2",
+		"uuid": "^3.2.1",
 		"ws": "^5.1.0"
 	},
 	"optionalDependencies": {
