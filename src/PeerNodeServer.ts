@@ -18,7 +18,7 @@ While progressively decrypting the message
 */
 class PeerNodeServer {
 	public readonly server: http.Server
-	private rsa: NodeRSA = new NodeRSA({ b: 512 })
+	private rsa: NodeRSA;
 
 	constructor(private serverPort: number) {
 		this.init()
@@ -65,35 +65,37 @@ class PeerNodeServer {
 	}
 
 	init() {
+		this.rsa = new NodeRSA();
 		var fileName = "./data/onion" + this.serverPort + ".json"
-		fs.exists(fileName, exists => {
-			if (exists) {
-				console.log("JSON exists, loading " + fileName)
-				//Load RSA files
-				const str = fs.readFileSync(fileName, "utf8")
-				const keys = JSON.parse(str)
 
-				this.rsa.importKey(keys["public"], "pkcs8-public")
-				this.rsa.importKey(keys["private"], "pkcs8-private")
+		var exists = fs.existsSync(fileName);
 
-				console.log("Keys loaded.")
-			} else {
-				console.log("Generating keys...")
+		if (exists) {
+			console.log("JSON exists, loading " + fileName)
+			//Load RSA files
+			const str = fs.readFileSync(fileName, "utf8")
+			const keys = JSON.parse(str)
 
-				// Generate RSA key pair.
-				this.rsa.generateKeyPair()
-				var publicKey = this.rsa.exportKey("pkcs8-public") //export public key
-				var privateKey = this.rsa.exportKey("pkcs8-private") //export private key
-				console.log("Generated key pair")
-				console.log("----------------------------")
+			this.rsa.importKey(keys["public"], "pkcs8-public")
+			this.rsa.importKey(keys["private"], "pkcs8-private")
 
-				const keys = { public: publicKey, private: privateKey }
-				var jsonString = JSON.stringify(keys)
+			console.log("Keys loaded.")
+		} else {
+			console.log("Generating keys...")
 
-				//Create RSA key JSON file
-				fs.writeFileSync(fileName, jsonString)
-			}
-		})
+			// Generate RSA key pair.
+			this.rsa.generateKeyPair(512);
+			var publicKey = this.rsa.exportKey("pkcs8-public") //export public key
+			var privateKey = this.rsa.exportKey("pkcs8-private") //export private key
+			console.log("Generated key pair")
+			console.log("----------------------------")
+
+			const keys = { public: publicKey, private: privateKey }
+			var jsonString = JSON.stringify(keys)
+
+			//Create RSA key JSON file
+			fs.writeFileSync(fileName, jsonString)
+		}
 
 		this.timerRun()
 
