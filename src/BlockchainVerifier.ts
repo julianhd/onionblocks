@@ -5,7 +5,7 @@ import { Block } from './Blockchain';
 import NodeRSA from "node-rsa"
 
 
-class BlockchainVerifier {
+export default class BlockchainVerifier {
     names: string[] = [];   // Keep track of all the names of users.
     map: Map<string, string> = new Map<string, string>();   // Maps names - publickey.
 
@@ -18,7 +18,7 @@ class BlockchainVerifier {
     //     throw console.error("User not found.");
     // }
 
-    verify(block: Block<BlockContent>, blockchain: Array<Block<BlockContent>>) {
+    verify(block: Block<BlockContent> | null, blockchain: Array<Block<BlockContent>>) {
         var {names, map} = this
         var i: any;
         var preseq = 0;
@@ -30,7 +30,7 @@ class BlockchainVerifier {
             const hash = createHash("sha256");
             hash.update(serialization);
             const digest = hash.digest("hex");
-            if (cur.hash.substring(0, 4) !== "000")
+            if (cur.hash.substring(0, 3) !== "000")
                 throw console.error("The hash doesn't start with 000.");
             if (i == 0) {
                 if (block == null)
