@@ -1,8 +1,8 @@
 import http from "http"
 import express from "express"
+import bodyParser from "body-parser"
 import fs from "fs"
 import NodeRSA from "node-rsa"
-import cors from "cors"
 import os from "os"
 import got from "got"
 
@@ -24,13 +24,12 @@ class PeerNodeServer {
 		this.init()
 
 		const app = express()
-		app.use(cors)
+		app.use(bodyParser.json());
 
 		// Handle POST requests
 		app.post("/request", async (req, res) => {
-			console.log("PeerNodeServer: New Request")
 			try {
-				const requestMessage: Request = JSON.parse(req.body)
+				const requestMessage: Request = req.body;
 				const decryptedMessage: Relay | Exit<any> = this.rsa.decrypt(
 					requestMessage.encrypted,
 					"json",
@@ -42,12 +41,13 @@ class PeerNodeServer {
 					const nextRequest: Request = {
 						encrypted: decryptedMessage.encrypted,
 					}
-					const data = JSON.stringify(req)
 
 					await got(`http://${decryptedMessage.next}/request`, {
 						method: "POST",
-						body: data,
+						json: true,
+						body: req,
 					})
+
 				} else if (decryptedMessage.type == "exit") {
 					const miner = new Miner()
 					const block = await miner.mine(decryptedMessage.content)

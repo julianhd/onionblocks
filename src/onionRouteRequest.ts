@@ -30,13 +30,14 @@ export default async function onionRouteRequest<T extends BlockContent>(
 	const req: Request = {
 		encrypted: r1,
 	}
-	const data = JSON.stringify(req)
 
 	console.log("onionRouteRequest: sending request -- " + JSON.stringify(n1));
 	await got(`http://${n1.host}:${n1.port}/request`, {
 		method: "POST",
-		body: data,
-	})
+		body: req,
+		json: true
+	});
+
 	console.log("OnionRouteQuest: sent first request");
 }
 
