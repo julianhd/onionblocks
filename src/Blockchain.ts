@@ -74,7 +74,7 @@ export default class Blockchain {
 	 */
 	async get(): Promise<Array<Block<BlockContent>>> {
 		const response = await got(
-			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain?since=0`,
+			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain?since=-1`,
 		)
 		const blockchain: Array<Block<BlockContent>> = JSON.parse(response.body)
 		return blockchain
@@ -86,10 +86,12 @@ export default class Blockchain {
 	 * @param block The block to be posted
 	 */
 	async post<T extends BlockContent>(block: Block<T>) {
+		// console.log("Blockchain: posting a new block");
 		const data = JSON.stringify(block)
 		await got(`http://${MASTER_HOST}:${MASTER_PORT}/block`, {
 			method: "POST",
-			body: data,
+			body: block,
+			json: true
 		})
 	}
 }
