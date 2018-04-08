@@ -1,8 +1,4 @@
-div.container {
-	width: 60%;
-	margin: auto;
-}
-
+/************** Fonts **************/
 @font-face {
 	font-family: OpenSansBold;
 	src: url(OpenSans-Bold.ttf);
@@ -11,6 +7,11 @@ div.container {
 @font-face {
 	font-family: OpenSansRegular;
 	src: url(OpenSans-Regular.ttf);
+}
+
+div.container {
+	width: 60%;
+	margin: auto;
 }
 
 body {
@@ -29,7 +30,8 @@ footer {
 	margin: auto;
 }
 
-h2 {
+h2,
+h3 {
 	font-family: OpenSansBold;
 }
 
@@ -39,7 +41,7 @@ footer {
 }
 
 .msgLog {
-	max-height: 50vh;
+	max-height: 60vh;
 	margin: 10px;
 	padding: 10px;
 	width: auto;
@@ -66,6 +68,7 @@ footer {
 .header-flex-container {
 	display: flex;
 	flex-flow: row wrap;
+	justify-content: left;
 }
 
 .receiver-flex-container {
@@ -106,8 +109,9 @@ button {
 	padding: 10px;
 	margin: 5px;
 	resize: none;
-	border-radius: 50px;
-	font-family: Helvetica;
+	border-radius: 15px;
+	font-family: OpenSansRegular;
+	transition-duration: 0.4s;
 }
 
 input,
@@ -117,6 +121,14 @@ button {
 	color: white;
 	text-align: center;
 	text-decoration: none;
+}
+
+button {
+	font-family: OpenSansBold;
+}
+
+button:hover {
+	background-color: #ff7640;
 }
 
 textarea:focus,
@@ -180,5 +192,58 @@ li a {
 }
 
 li a:hover {
-	color: #ff661a;
+	color: #ff7640;
+}
+
+#about {
+	border-radius: 0px;
+	width: 180px;
+	padding: 10%;
+	font-size: 20px;
+	font-family: OpenSansRegular;
+	transition-duration: 0.4s;
+}
+
+button:focus {
+	outline: 0;
+}
+
+#about:hover {
+	background-color: white;
+	color: #ff7640;
+	outline: 3px solid #ff7640;
+	outline-offset: -2px;
+	font-weight: bold;
+}
+
+.about-flex-container {
+	display: flex;
+	flex-flow: row wrap;
+	flex-direction: row;
+	padding: 5px;
+	margin: auto;
+	width: 90%;
+	justify-content: center;
+	align-items: center;
+}
+
+.letter {
+	color: #6410e2;
+}
+
+h2,
+h3 {
+	text-align: center;
+	font-family: OpenSansRegular;
+}
+
+a {
+	color: #6410e2;
+	text-decoration: none;
+	font-family: OpenSansBold;
+}
+
+a:hover {
+	color: #ff7640;
+	font-family: OpenSansBold;
 }

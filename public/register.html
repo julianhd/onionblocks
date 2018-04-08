@@ -1,38 +1,36 @@
-<!DOCTYPE html>
 <html>
 
 <head>
     <link rel="stylesheet" href="style.css">
-    <script src="/chat.js"></script>
+    <script src="/js/chat.js"></script>
+    <script src="/js/login.js"></script>
+    <script>checkLogin();</script>
 </head>
 
 <header>
-    <div class="header-flex-container">
-        <div id="textbox" style="flex-grow: 5; ">
-            <h2>OnionBlocks</h2>
+        <div class="header-flex-container">
+            <div id="textbox" >
+                <h2 style="font-family: OpenSansBold; text-align: left; padding-right:10px;">OnionBlocks</h2>
+            </div>
+            <div id="textbox" >
+                <ul>
+                    <li>
+                        <a href="/" href="">Home</a>
+                    </li>
+                    <li>
+                        <a href="about.html">About</a>
+                    </li>
+                    <li>
+                        <a href="login.html">Login</a>
+                    </li>
+                    <li>
+                        <a href="register.html">Register</a>
+                    </li>
+                </ul>
+            </div>
+           
         </div>
-        <div id="textbox" style="flex-grow: 8">
-            <ul>
-                <li>
-                    <a href="/" href="">Home</a>
-                </li>
-                <li>
-                    <a href="">About</a>
-                </li>
-                <li>
-                    <a href="login.html">Login</a>
-                </li>
-                <li>
-                    <a href="register.html">Register</a>
-                </li>
-            </ul>
-        </div>
-        <div id="textbox" align="right" style="flex-grow: 1; padding: 10px">@username</div>
-        <div id="textbox" style="flex-grow: 0.2">
-            <img src="avatar.png" alt="Mountain View" width="45" height="45">
-        </div>
-    </div>
-</header>
+    </header>
 
 <script>
     function reg() {
@@ -42,12 +40,14 @@
 
     async function hit() {
         event.preventDefault();
+        console.log("here");
         //get the message SOMEHOW
         var pls = document.getElementById('username').value;
         try {
             await chat.register(pls);
             console.log(`Registered as '${pls}'`)
-            window.location.assign("index.html");
+            document.getElementById("msgLog").innerHTML = "<h2>Register</h2>Thank you for registering, " + pls + "!";
+          //  window.location.assign("index.html");
         } catch (error) {
             // Register error occurred
             console.error("Couldn't register!")
@@ -59,22 +59,28 @@
 <body onload="reg();">
     <div class="main-flex-container">
 
-        <div class="msgLog">
-            <h2>Register</h2>
-            <b>Username</b>
-            <input type="text" id="username" name="username">
-            <button onclick="hit()">Register</button>
-
-        </div>
-
-        <div>
-            <form>
-                <div class="input-flex-container">
-
+        <div id="msgLog" class="msgLog">
+                <h2>Welcome!</h2>
+                <h4 style="text-align: center;">Register</h4>
+                <div align="center">
+                    <form class="login-form">
+                        <input type="text" id="username" placeholder="username"  />
+                        <br>
+                        <input type="password" id="password" placeholder="password" style="background-color:white; color:black; border: 1px solid rgb(169, 169, 169); text-align: left;"/>
+                        <br>
+                        <input type="password" id="confirmedPassword" placeholder="confirm password" style="background-color:white; color:black; border: 1px solid rgb(169, 169, 169); text-align: left;"/>
+                        <br>
+                        <button onclick="hit()" style="width:175px;">Register</button>
+                        <p class="message">Already registered?
+                            <a href="login.html">Login.</a>
+                        </p>
+                    </form>
                 </div>
-            </form>
+    
+
         </div>
 
+        
     </div>
 
     <footer>OnionBlocks &copy; 2018</footer>

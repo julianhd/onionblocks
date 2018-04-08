@@ -3,21 +3,23 @@
 
 <head>
     <link rel="stylesheet" href="style.css">
-    <script src="/chat.js"></script>
+    <script src="/js/chat.js"></script>
+    <script src="/js/login.js"></script>
+
 </head>
 
 <header>
     <div class="header-flex-container">
-        <div id="textbox" style="flex-grow: 5; ">
-            <h2>OnionBlocks</h2>
+        <div id="textbox">
+            <h2 style="font-family: OpenSansBold; text-align: left; padding-right:10px;">OnionBlocks</h2>
         </div>
-        <div id="textbox" style="flex-grow: 8">
+        <div id="textbox">
             <ul>
                 <li>
-                    <a href="/">Home</a>
+                    <a href="/" href="">Home</a>
                 </li>
                 <li>
-                    <a href="">About</a>
+                    <a href="about.html">About</a>
                 </li>
                 <li>
                     <a href="login.html">Login</a>
@@ -27,79 +29,26 @@
                 </li>
             </ul>
         </div>
-        <div id="textbox" align="right" style="flex-grow: 1; padding: 10px">@username</div>
-        <div id="textbox" style="flex-grow: 0.2">
-            <img src="avatar.png" alt="Mountain View" width="45" height="45">
-        </div>
+
     </div>
 </header>
 
-<script>
-    function reg() {
-        window.captureEvents(Event.SUBMIT);
-        window.onsubmit = hit;
-    }
-
-    function hit() {
-        event.preventDefault();
-        console.log('hit');
-        //get the message SOMEHOW
-        var pls = document.getElementById('TXT').value;
-        console.log(pls);
-        chat.sendChat(pls);
-    }
-</script>
-
-<body onload="reg();">
+<body>
     <div class="main-flex-container">
-        <div class="receiver-flex-container">
-            <div>
-                <img src="avatar.png" alt="Mountain View" width="30" height="30">
-            </div>
-            <div id="textbox">
-                <b>@receiver</b>
-            </div>
-        </div>
-
         <div class="msgLog">
-            <div id="beginning">This is the beginning of your chat history.</div>
-            <script language="javascript">
-                document.body.onload = addElement;
-                function addElement() {
-                    chat.onMessage(chat => {
-                        // create a new div element 
-                        var newDiv = document.createElement("div");
-                        // and give it some content 
-                        var from = document.createTextNode(chat.from);
-                        var message = document.createTextNode(chat.message);
-                        // add the text node to the newly created div
-                        /**   newDiv.appendChild(from); */
-                        newDiv.appendChild(message);
-                        // add the newly created element and its content into the DOM 
-                        var currentDiv = document.getElementById("beginning");
-                        currentDiv.parentNode.appendChild(newDiv, currentDiv);
-                    })
-                }
-
-            </script>
         </div>
-
-        <div>
-            <form>
-                <div class="input-flex-container">
-                    <div>
-                        <textarea id="TXT" name="message" rows="1" cols="80"></textarea>
-                    </div>
-                    <div>
-                        <button onclick="hit()">Send</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
     </div>
-
     <footer>OnionBlocks &copy; 2018</footer>
-    </div>
+    <script>
+        if (checkLogin()) {
+            window.location.assign("messages.html");
+        } else {
+            window.location.assign("welcome.html");
+        }
+    </script>
+
+
+
+</body>
 
 </html>

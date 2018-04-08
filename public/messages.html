@@ -1,0 +1,100 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <script src="/js/chat.js"></script>
+    <script src="/js/login.js"></script>
+    <script>
+        function deleteCookies() {
+            console.log("ok mas");
+            document.cookie = "loggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+        function sendMessage() {
+            event.preventDefault();
+            var message = document.getElementById('TXT').value;
+            document.getElementById('TXT').value = null;
+            chat.sendChat(message);
+        }
+    </script>
+</head>
+
+<header>
+    <div class="header-flex-container">
+        <div id="textbox" style="flex-grow: 5; ">
+            <h2 style="font-family: OpenSansBold; text-align: left;">OnionBlocks</h2>
+        </div>
+        <div id="textbox" style="flex-grow: 8">
+            <ul>
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                <li>
+                    <a href="about.html">About</a>
+                </li>
+                <li>
+                    <a href="javascript:deleteCookies()">Logout</a>
+                </li>
+            </ul>
+        
+        </div>
+        <div id="textbox" align="right" style="flex-grow: 1; padding: 10px">@username</div>
+        <div id="textbox" style="flex-grow: 0.2">
+            <img src="avatar.png" alt="Mountain View" width="45" height="45">
+        </div>
+    </div>
+</header>
+
+<body onload="test();">
+    <div class="main-flex-container">
+        <div class="receiver-flex-container">
+            <div>
+                <img src="avatar.png" alt="Mountain View" width="30" height="30">
+            </div>
+            <div id="textbox">
+                <b>@receiver</b>
+            </div>
+        </div>
+
+        <div class="msgLog">
+            <div id="beginning">This is the beginning of your chat history.</div>
+            <script language="javascript">
+                document.body.onload = addElement;
+                function addElement() {
+                    chat.onMessage(chat => {
+                        // create a new div element 
+                        var newDiv = document.createElement("div");
+                        // and give it some content 
+                        var from = document.createTextNode(chat.from);
+                        var message = document.createTextNode(chat.message);
+                        // add the text node to the newly created div
+                        /**   newDiv.appendChild(from); */
+                        newDiv.appendChild(message);
+                        // add the newly created element and its content into the DOM 
+                        var currentDiv = document.getElementById("beginning");
+                        currentDiv.parentNode.appendChild(newDiv, currentDiv);
+                    })
+                }
+
+            </script>
+        </div>
+
+        <div>
+            <form>
+                <div class="input-flex-container">
+                    <div>
+                        <textarea id="TXT" name="message" rows="1" cols="80"></textarea>
+                    </div>
+                    <div>
+                        <button onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <footer>OnionBlocks &copy; 2018</footer>
+
+    </div>
+
+</html>
