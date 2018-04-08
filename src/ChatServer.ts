@@ -190,14 +190,14 @@ class ChatServer {
 			}
 
 			var rsa = require("node-rsa")
-			var key = new rsa(this.user.private)
-
+			var key = new rsa(this.user.private, 'pkcs8-private')
 			var chatString = JSON.stringify(chat)
 			var chatBuffer = Buffer.from(chatString)
 
 			var entity: Entity<Chat> = {
 				content: chat,
-				signature: key.sign(chatBuffer).toString("hex"),
+				// signature: key.sign(chatBuffer).toString("hex"),
+				signature: key.sign(chatBuffer, 'base64')
 			}
 
 			// TODO Remove this temporary hack

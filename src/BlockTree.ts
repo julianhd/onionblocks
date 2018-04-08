@@ -155,8 +155,24 @@ export default class BlockchainTree {
         nodeList: this.struct.nodeList.slice(pos+1)
       }
     }
-
     return chaindetails;
+  }
+
+  /**
+   * Returns the block for this uuid or null if it doesn't exists.
+   *
+   * @param {string} uuid : UUID of the block to get
+   * @returns {Block | null} The block or null if none existant
+   */
+  getBlock(uuid: string | null) {
+    let normalized_uuid = (uuid != null) ? uuid : "";
+
+    if (!this.uuidExists(normalized_uuid)) {
+      return null;
+    }
+    else {
+      return this.struct.blockchain[this.getUUIDPos(normalized_uuid)];
+    }
   }
 
   // TODO change to the real toString .. no time
