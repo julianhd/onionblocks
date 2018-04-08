@@ -1,3 +1,4 @@
+/* from https://codepen.io/guillaumerxl/pen/pjbYoB */
 Letters = function() {
 	this.lettersDOM = null
 	this.active = null

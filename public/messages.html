@@ -1,29 +1,31 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="style.css">
+    <title>Messages</title>
+    <link rel="stylesheet" href="style/style.css">
     <script src="/js/chat.js"></script>
     <script src="/js/login.js"></script>
     <script>
         function deleteCookies() {
-            console.log("ok mas");
             document.cookie = "loggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         }
         function sendMessage() {
             event.preventDefault();
             var message = document.getElementById('TXT').value;
+            if (document.getElementById('TXT').value != null && document.getElementById('TXT').value != "") {
+                chat.sendChat(message);
+            }
             document.getElementById('TXT').value = null;
-            chat.sendChat(message);
         }
     </script>
 </head>
 
 <header>
     <div class="header-flex-container">
-        <div id="textbox" style="flex-grow: 5; ">
-            <h2 style="font-family: OpenSansBold; text-align: left;">OnionBlocks</h2>
+        <div id="textbox">
+            <h2 style="font-family: OpenSansBold; text-align: left; padding-right:10px;">OnionBlocks</h2>
         </div>
-        <div id="textbox" style="flex-grow: 8">
+        <div id="textbox">
             <ul>
                 <li>
                     <a href="/">Home</a>
@@ -32,14 +34,25 @@
                     <a href="about.html">About</a>
                 </li>
                 <li>
-                    <a href="javascript:deleteCookies()">Logout</a>
+                    <a href="javascript:deleteCookies(); window.location.assign('welcome.html');">Logout</a>
+                    
                 </li>
             </ul>
-        
+
         </div>
-        <div id="textbox" align="right" style="flex-grow: 1; padding: 10px">@username</div>
+        <div id="textbox" align="right" style="flex-grow: 3; padding: 10px">
+            <span id="at">@</span>
+            <script>
+                var newDiv = document.createElement("span");
+                var user = document.createTextNode(getCookie("username").toString());
+                newDiv.appendChild(user);
+                var currentDiv = document.getElementById("at");
+                currentDiv.parentNode.appendChild(newDiv, currentDiv);
+                console.log(getCookie("username").toString());
+            </script>
+        </div>
         <div id="textbox" style="flex-grow: 0.2">
-            <img src="avatar.png" alt="Mountain View" width="45" height="45">
+            <img src="/img/account.png" alt="Mountain View" width="45" height="45">
         </div>
     </div>
 </header>
@@ -48,44 +61,73 @@
     <div class="main-flex-container">
         <div class="receiver-flex-container">
             <div>
-                <img src="avatar.png" alt="Mountain View" width="30" height="30">
+                <img src="/img/receiver.png" alt="Mountain View" width="30" height="30">
             </div>
             <div id="textbox">
-                <b>@receiver</b>
+                <b>Direct Messages</b>
             </div>
         </div>
 
         <div class="msgLog">
-            <div id="beginning">This is the beginning of your chat history.</div>
-            <script language="javascript">
-                document.body.onload = addElement;
-                function addElement() {
-                    chat.onMessage(chat => {
-                        // create a new div element 
-                        var newDiv = document.createElement("div");
-                        // and give it some content 
-                        var from = document.createTextNode(chat.from);
-                        var message = document.createTextNode(chat.message);
-                        // add the text node to the newly created div
-                        /**   newDiv.appendChild(from); */
-                        newDiv.appendChild(message);
-                        // add the newly created element and its content into the DOM 
-                        var currentDiv = document.getElementById("beginning");
-                        currentDiv.parentNode.appendChild(newDiv, currentDiv);
-                    })
-                }
+            <div style="max-height:50%;">
+                <div id="beginning" style="color:darkgray">This is the beginning of your chat history.</div>
+                <br>
+                <script>
+                    document.body.onload = addElement;
+                    function addElement() {
+                        chat.onMessage(chat => {
+                            var newDiv = document.createElement("div");
 
-            </script>
+                            // Create a new JavaScript Date object based on the timestamp
+                            // multiplied by 1000 so that the argument is in milliseconds, not seconds.
+                            var date = new Date(chat.timestamp);
+                            // Hours part from the timestamp
+                            var hours = date.getHours();
+                            // Minutes part from the timestamp
+                            var minutes = "0" + date.getMinutes();
+                            // Seconds part from the timestamp
+                            var seconds = "0" + date.getSeconds();
+
+                            // Will display time in 10:30:23 format
+                            var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+
+                            var from = document.createTextNode(chat.from + " ");
+                            var message = document.createTextNode(chat.message);
+                            var time = document.createTextNode(formattedTime + "\240\240\240");
+
+                            var spanFrom = document.createElement("span");
+                            spanFrom.style["font-family"] = "OpenSansBold";
+                            spanFrom.style["font-weight"] = "bold";
+                            spanFrom.appendChild(from);
+
+                            var spanTime = document.createElement("span");
+                            spanTime.style.fontSize = "12px";
+                            spanTime.style.color = "grey";
+                            spanTime.appendChild(time);
+
+                            newDiv.appendChild(spanTime);
+                            newDiv.appendChild(spanFrom);
+                            newDiv.appendChild(message);
+
+                            newDiv.style["padding-bottom"] = "5px";
+
+                            var currentDiv = document.getElementById("beginning");
+                            currentDiv.parentNode.appendChild(newDiv, currentDiv);
+                        })
+                    }
+
+                </script>
+            </div>
         </div>
 
         <div>
             <form>
                 <div class="input-flex-container">
                     <div>
-                        <textarea id="TXT" name="message" rows="1" cols="80"></textarea>
+                        <textarea id="TXT" name="message" rows="1" cols="100"></textarea>
                     </div>
                     <div>
-                        <button onclick="sendMessage()">Send</button>
+                        <button style="border-radius: 25px;" onclick="sendMessage()">Send</button>
                     </div>
                 </div>
             </form>

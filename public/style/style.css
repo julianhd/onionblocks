@@ -1,12 +1,12 @@
 /************** Fonts **************/
 @font-face {
 	font-family: OpenSansBold;
-	src: url(OpenSans-Bold.ttf);
+	src: url('OpenSans-Bold.ttf');
 }
 
 @font-face {
 	font-family: OpenSansRegular;
-	src: url(OpenSans-Regular.ttf);
+	src: url('OpenSans-Regular.ttf');
 }
 
 div.container {
@@ -20,18 +20,16 @@ body {
 	font-size: 14px;
 }
 
-header,
-footer {
+header, footer {
 	padding: 10px;
 	color: white;
-	background-color: #6410e2;
+	background:linear-gradient(#8740f2, #6410e2);
 	clear: left;
 	width: 60%;
 	margin: auto;
 }
 
-h2,
-h3 {
+h2, h3 {
 	font-family: OpenSansBold;
 }
 
@@ -41,8 +39,11 @@ footer {
 }
 
 .msgLog {
-	max-height: 60vh;
-	margin: 10px;
+	max-height: 60%;
+	margin-top: 10px;
+	margin-bottom:0px;
+	margin-right:0px;
+	margin-left: 0px;
 	padding: 10px;
 	width: auto;
 	overflow: auto;
@@ -144,7 +145,8 @@ input[type="text"] {
 }
 
 textarea {
-	width: calc(50vw - 70px); /* calc and viewport to the rescue */
+	width: calc(50vw - 0px); 
+	border-radius: 25px;
 }
 
 /* width */
@@ -152,20 +154,17 @@ textarea {
 	width: 10px;
 }
 
-/***** scrollbar ******/
-/* Track */
+/* scrollbar */
 ::-webkit-scrollbar-track {
 	background: #eeeeee;
 	margin-right: 5px;
 }
 
-/* Handle */
 ::-webkit-scrollbar-thumb {
 	background: #b488f7;
 	border-radius: 10px;
 }
 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
 	background: #9658f3;
 }
@@ -192,7 +191,7 @@ li a {
 }
 
 li a:hover {
-	color: #ff7640;
+	color: #ff9166;
 }
 
 #about {
@@ -244,6 +243,9 @@ a {
 }
 
 a:hover {
-	color: #ff7640;
+	color: #ff9166;
 	font-family: OpenSansBold;
 }
+
+
+	

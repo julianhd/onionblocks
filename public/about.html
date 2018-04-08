@@ -2,7 +2,8 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="style.css">
+    <title>About</title>
+    <link rel="stylesheet" href="style/style.css">
     <script src="/js/chat.js"></script>
     <script src="/js/login.js"></script>
     <script>
@@ -28,12 +29,7 @@
                 <li>
                     <a href="about.html">About</a>
                 </li>
-                <li>
-                    <a href="login.html">Login</a>
-                </li>
-                <li>
-                    <a href="register.html">Register</a>
-                </li>
+
             </ul>
         </div>
 
@@ -46,13 +42,13 @@
         <div class="msgLog">
             <h2>About</h2>
             <div style="width:75%; text-align: center; margin:auto;">
-                OnionBlocks lets users chat with each other without revealing their real identity. This is accomplished by routing messages through
-                intermediary nodes to hide the IP address of the sender. Each node only knows the address of the next node
-                to forward the message to. The message itself is encrypted and is only revealed to the final node. 
-                <br><br>The network
-                enables pseudonymous verification of participants using public keys stored on a blockchain. This ensures
-                that every user will always be the same person on the network, and nobody else can impersonate
-                their name. The chat history is also saved on the blockchain, to provide a tamper-resistant record of messages.
+                OnionBlocks lets users chat with each other without revealing their real identity. This is accomplished by routing messages
+                through intermediary nodes to hide the IP address of the sender. Each node only knows the address of the
+                next node to forward the message to. The message itself is encrypted and is only revealed to the final node.
+                <br>
+                <br>The network enables pseudonymous verification of participants using public keys stored on a blockchain. This
+                ensures that every user will always be the same person on the network, and nobody else can impersonate their
+                name. The chat history is also saved on the blockchain, to provide a tamper-resistant record of messages.
 
             </div>
             <br>
@@ -64,9 +60,6 @@
                 </div>
                 <div>
                     <button id="about" onclick="location.href = '/register.html';">Register</button>
-                </div>
-                <div>
-                    <button id="about" onclick="location.href = '/contact.html';">Contact</button>
                 </div>
             </div>
 

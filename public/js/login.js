@@ -2,6 +2,7 @@ async function doLogin(username) {
 	try {
 		await chat.login(username)
 		document.cookie = "loggedIn=true; max-age:60"
+		document.cookie = "username=" + username
 		var x = document.cookie
 		console.log(x)
 	} catch (error) {

@@ -2,37 +2,31 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="style/style.css">
+    <title>Login</title>
     <script src="/js/chat.js"></script>
     <script src="/js/login.js"></script>
     <script>checkLogin();</script>
 </head>
 
 <header>
-        <div class="header-flex-container">
-            <div id="textbox" >
-                <h2 style="font-family: OpenSansBold; text-align: left; padding-right:10px;">OnionBlocks</h2>
-            </div>
-            <div id="textbox" >
-                <ul>
-                    <li>
-                        <a href="/" href="">Home</a>
-                    </li>
-                    <li>
-                        <a href="about.html">About</a>
-                    </li>
-                    <li>
-                        <a href="login.html">Login</a>
-                    </li>
-                    <li>
-                        <a href="register.html">Register</a>
-                    </li>
-                </ul>
-            </div>
-           
+    <div class="header-flex-container">
+        <div id="textbox">
+            <h2 style="font-family: OpenSansBold; text-align: left; padding-right:10px;">OnionBlocks</h2>
         </div>
-    </header>
+        <div id="textbox">
+            <ul>
+                <li>
+                    <a href="/" href="">Home</a>
+                </li>
+                <li>
+                    <a href="about.html">About</a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</header>
 
 <script>
     var pls = null;
@@ -64,9 +58,10 @@
             <h4 style="text-align: center;">Login</h4>
             <div align="center">
                 <form class="login-form">
-                    <input type="text" id="username" placeholder="username"  />
+                    <input type="text" id="username" placeholder="username" />
                     <br>
-                    <input type="password" id="password" placeholder="password" style="background-color:white; color:black; border: 1px solid rgb(169, 169, 169); text-align: left;"/>
+                    <input type="password" id="password" placeholder="password" style="background-color:white; color:black; border: 1px solid rgb(169, 169, 169); text-align: left;"
+                    />
                     <br>
                     <button onclick="hit()" style="width:175px;">Login</button>
                     <p class="message">Not registered?

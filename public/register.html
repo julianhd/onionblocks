@@ -1,36 +1,33 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/loading.css">
+    <title>Register</title>
     <script src="/js/chat.js"></script>
     <script src="/js/login.js"></script>
     <script>checkLogin();</script>
 </head>
 
 <header>
-        <div class="header-flex-container">
-            <div id="textbox" >
-                <h2 style="font-family: OpenSansBold; text-align: left; padding-right:10px;">OnionBlocks</h2>
-            </div>
-            <div id="textbox" >
-                <ul>
-                    <li>
-                        <a href="/" href="">Home</a>
-                    </li>
-                    <li>
-                        <a href="about.html">About</a>
-                    </li>
-                    <li>
-                        <a href="login.html">Login</a>
-                    </li>
-                    <li>
-                        <a href="register.html">Register</a>
-                    </li>
-                </ul>
-            </div>
-           
+    <div class="header-flex-container">
+        <div id="textbox">
+            <h2 style="font-family: OpenSansBold; text-align: left; padding-right:10px;">OnionBlocks</h2>
         </div>
-    </header>
+        <div id="textbox">
+            <ul>
+                <li>
+                    <a href="/" href="">Home</a>
+                </li>
+                <li>
+                    <a href="about.html">About</a>
+                </li>
+
+            </ul>
+        </div>
+
+    </div>
+</header>
 
 <script>
     function reg() {
@@ -44,10 +41,11 @@
         //get the message SOMEHOW
         var pls = document.getElementById('username').value;
         try {
+            document.getElementById("msgLog").innerHTML = "<h2>Welcome!</h2><div class=\"cs-loader\"> <div class=\"cs-loader-inner\"> <label>	●</label><label>	●</label><label>	●</label><label>	●</label><label>	●</label><label>	●</label> </div ></div >";
             await chat.register(pls);
             console.log(`Registered as '${pls}'`)
-            document.getElementById("msgLog").innerHTML = "<h2>Register</h2>Thank you for registering, " + pls + "!";
-          //  window.location.assign("index.html");
+            document.getElementById("msgLog").innerHTML = "<h2>Thank you for registering, " + pls + "! </h2> <div align=center><p>Enjoy OnionsBlocks!  <div><button style=\"padding=0px;\" onclick=\"location.href = '/login.html';\">Login</button></div></div>";
+            //  window.location.assign("index.html");
         } catch (error) {
             // Register error occurred
             console.error("Couldn't register!")
@@ -60,27 +58,29 @@
     <div class="main-flex-container">
 
         <div id="msgLog" class="msgLog">
-                <h2>Welcome!</h2>
-                <h4 style="text-align: center;">Register</h4>
-                <div align="center">
-                    <form class="login-form">
-                        <input type="text" id="username" placeholder="username"  />
-                        <br>
-                        <input type="password" id="password" placeholder="password" style="background-color:white; color:black; border: 1px solid rgb(169, 169, 169); text-align: left;"/>
-                        <br>
-                        <input type="password" id="confirmedPassword" placeholder="confirm password" style="background-color:white; color:black; border: 1px solid rgb(169, 169, 169); text-align: left;"/>
-                        <br>
-                        <button onclick="hit()" style="width:175px;">Register</button>
-                        <p class="message">Already registered?
-                            <a href="login.html">Login.</a>
-                        </p>
-                    </form>
-                </div>
-    
+            <h2>Welcome!</h2>
+            <h4 style="text-align: center;">Register</h4>
+            <div align="center">
+                <form class="login-form">
+                    <input type="text" id="username" placeholder="username" />
+                    <br>
+                    <input type="password" id="password" placeholder="password" style="background-color:white; color:black; border: 1px solid rgb(169, 169, 169); text-align: left;"
+                    />
+                    <br>
+                    <input type="password" id="confirmedPassword" placeholder="confirm password" style="background-color:white; color:black; border: 1px solid rgb(169, 169, 169); text-align: left;"
+                    />
+                    <br>
+                    <button onclick="hit()" style="width:175px;">Register</button>
+                    <p class="message">Already registered?
+                        <a href="login.html">Login.</a>
+                    </p>
+                </form>
+            </div>
+
 
         </div>
 
-        
+
     </div>
 
     <footer>OnionBlocks &copy; 2018</footer>
