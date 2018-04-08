@@ -9,6 +9,7 @@ export interface TreeNode {
 	position: number
 	parent: number
 	child: Array<number>
+  ancestorCount: number
 }
 
 export interface UUIDMap {
@@ -19,6 +20,8 @@ export interface BlockchainTreeStruct {
 	blockchain: Array<Block<BlockContent>>
 	nodeList: Array<TreeNode>
 	uuidMap: UUIDMap
+  longestChainHeadPos: number
+  longestChainHeadCount: number
 }
 
 export default class BlockchainTree {
@@ -36,7 +39,9 @@ export default class BlockchainTree {
       this.struct = {
         blockchain : [],
         nodeList : [],
-        uuidMap : {}
+        uuidMap : {},
+        longestChainHeadPos: -1,
+        longestChainHeadCount: 0
       };
     }
     else {
@@ -87,13 +92,20 @@ export default class BlockchainTree {
         throw new Error("Invalid parent");
       }
 
+      let ancestorCount = (parentPos >= 0) ? this.struct.nodeList[parentPos].ancestorCount + 1 : 0
       let pos = this.struct.blockchain.length;
       this.struct.blockchain[pos] = block;
       this.struct.nodeList[pos] = {
         position : pos,
         parent : parentPos,
         child : [],
+        ancestorCount: ancestorCount
       };
+
+      if (ancestorCount > this.struct.longestChainHeadCount) {
+        this.struct.longestChainHeadPos = pos;
+      }
+
       this.updateParentChild(parentPos, pos);
 
       this.struct.uuidMap[block.data.uuid] = pos;
@@ -124,8 +136,14 @@ export default class BlockchainTree {
   }
 
 
+  /**
+   * Returns the head block from the longest chain in the tree.
+   *
+   * @returns {Block | null} returns the head of the longest chain, null if tree is empty.
+   */
   getHead() {
-    let head = this.struct.blockchain[this.struct.blockchain.length - 1];
+    let headPos = this.struct.longestChainHeadPos;
+    let head = this.struct.blockchain[headPos];
     if (!head) {
       return null;
     }
@@ -155,8 +173,24 @@ export default class BlockchainTree {
         nodeList: this.struct.nodeList.slice(pos+1)
       }
     }
-
     return chaindetails;
+  }
+
+  /**
+   * Returns the block for this uuid or null if it doesn't exists.
+   *
+   * @param {string} uuid : UUID of the block to get
+   * @returns {Block | null} The block or null if none existant
+   */
+  getBlock(uuid: string | null) {
+    let normalized_uuid = (uuid != null) ? uuid : "";
+
+    if (!this.uuidExists(normalized_uuid)) {
+      return null;
+    }
+    else {
+      return this.struct.blockchain[this.getUUIDPos(normalized_uuid)];
+    }
   }
 
   // TODO change to the real toString .. no time

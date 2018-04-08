@@ -68,13 +68,11 @@ class BlockChainServer {
     // console.log("New Block\n " + JSON.stringify(block));
 
     try {
-      let lastBlock = this.blockTree.getHead();
-      // TODO add this when modified
-      // this.verifier.verify(lastBlock, [block]);
+      this.verifier.verify(this.blockTree, block);
       this.blockTree.addBlock(block);
     } catch (err) {
-      // console.log("BlockChain Verify failed");
-      // console.log(err);
+      console.log("BlockChain Verify failed");
+      console.log(err);
       return false;
     }
     this.blockTree.displayNicely();
