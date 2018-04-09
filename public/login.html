@@ -34,16 +34,20 @@
         event.preventDefault();
         //get the message SOMEHOW
         username = document.getElementById('username').value;
-        pw = document.getElementById('password').value
-        try {
-            await chat.login(username, pw);
-            console.log(`Signed in as '${username}'`);
-            doLogin(username, pw);
-            window.location.assign("messages.html");
-        } catch (error) {
-            // Login error occurred
-            console.error("Couldn't sign in!");
-            window.alert("There was an login error, please try again.");
+        pw = document.getElementById('password').value;
+        if (username == "" | pw == "") {
+            alert("Please fill out every field.")
+        } else {
+            try {
+                await chat.login(username, pw);
+                console.log(`Signed in as '${username}'`);
+                doLogin(username, pw);
+                window.location.assign("messages.html");
+            } catch (error) {
+                // Login error occurred
+                console.error("Couldn't sign in!");
+                window.alert("Your password or username is incorrect. Try again?");
+            }
         }
     }
 

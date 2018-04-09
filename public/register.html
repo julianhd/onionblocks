@@ -37,19 +37,26 @@
 
     async function hit() {
         event.preventDefault();
-        console.log("here");
-        //get the message SOMEHOW
         var pls = document.getElementById('username').value;
         var pw = document.getElementById('password').value;
-        try {
-            document.getElementById("msgLog").innerHTML = "<h2>Welcome!</h2><div class=\"cs-loader\"> <div class=\"cs-loader-inner\"> <label>	●</label><label>	●</label><label>	●</label><label>	●</label><label>	●</label><label>	●</label> </div ></div >";
-            await chat.register(pls, pw);
-            console.log(`Registered as '${pls}'`)
-            document.getElementById("msgLog").innerHTML = "<h2>Thank you for registering, " + pls + "! </h2> <div align=center><p>Enjoy OnionsBlocks!  <div><button style=\"padding=0px;\" onclick=\"location.href = '/login.html';\">Login</button></div></div>";
-            //  window.location.assign("index.html");
-        } catch (error) {
-            // Register error occurred
-            console.error("Couldn't register!")
+        var pwConfirm = document.getElementById('confirmedPassword').value;
+        if (pls == "" | pw == "" | pwConfirm == "") {
+            alert("Please fill out every field.")
+        }
+        else if (pw != pwConfirm) {
+            alert("Your passwords don't match. Try again?");
+        }
+        else {
+            try {
+                document.getElementById("msgLog").innerHTML = "<h2>Welcome!</h2><div class=\"cs-loader\"> <div class=\"cs-loader-inner\"> <label>	●</label><label>	●</label><label>	●</label><label>	●</label><label>	●</label><label>	●</label> </div ></div >";
+                await chat.register(pls, pw);
+                console.log(`Registered as '${pls}'`)
+                document.getElementById("msgLog").innerHTML = "<h2>Thank you for registering, " + pls + "! </h2> <div align=center><p>Enjoy OnionsBlocks!  <div><button style=\"padding=0px;\" onclick=\"location.href = '/login.html';\">Login</button></div></div>";
+                //  window.location.assign("index.html");
+            } catch (error) {
+                // Register error occurred
+                console.error("Couldn't register!")
+            }
         }
     }
 
