@@ -21,6 +21,7 @@ class PeerNodeServer {
 	private rsa: NodeRSA;
 
 	constructor(private serverPort: number) {
+		this.rsa = new NodeRSA();		
 		this.init()
 
 		const app = express()
@@ -60,12 +61,10 @@ class PeerNodeServer {
 				throw error
 			}
 		})
-
 		this.server = http.createServer(app)
 	}
 
 	init() {
-		this.rsa = new NodeRSA();
 		var fileName = "./data/onion" + this.serverPort + ".json"
 
 		var exists = fs.existsSync(fileName);
@@ -109,7 +108,7 @@ class PeerNodeServer {
 		const node: OnionNode = {
 			type: "node",
 			timestamp: Date.now(),
-			host: os.hostname(),
+			host: "localhost",
 			port: this.serverPort,
 			public: this.rsa.exportKey("pkcs8-public"),
 		}

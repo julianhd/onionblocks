@@ -1,6 +1,7 @@
 import { createHash } from "crypto"
 import got from "got"
 import BlockchainTree, {BlockchainTreeStruct, TreeNode, UUIDMap} from "./BlockTree"
+import { setInterval } from "timers";
 
 const MASTER_HOST = "127.0.0.1"
 const MASTER_PORT = 8082
@@ -59,6 +60,7 @@ export interface Verifier {
 export type BlockHandlerCallback = (block: Block<BlockContent>) => void
 
 export default class Blockchain {
+	private uuids: Set<string> = new Set<string>()
 	constructor(
 		private verifier: Verifier | null,
 		private callback?: BlockHandlerCallback,
@@ -71,6 +73,17 @@ export default class Blockchain {
 				}
 			}
 		})
+		setInterval(async () => {
+			const blocks = await this.get()
+			if (callback != null) {
+				for(const block of blocks) {
+					if (!this.uuids.has(block.data.uuid)) {
+						callback(block)
+						this.uuids.add(block.data.uuid)
+					}
+				}
+			}
+		}, 500)
 	}
 
 	/**

@@ -13,6 +13,8 @@ window.chat = {
 		if (res.status === 401) {
 			throw new Error("Unauthorized")
 		}
+		localStorage.setItem("name", name)
+		localStorage.setItem("pw", pw)
 	},
 	async login(name, pw) {
 		const encodedName = encodeURIComponent(name)
@@ -26,11 +28,15 @@ window.chat = {
 		if (res.status === 401) {
 			throw new Error("Unauthorized")
 		}
+		localStorage.setItem("name", name)
+		localStorage.setItem("pw", pw)
 	},
 	async sendChat(message) {
-		const encoded = encodeURIComponent(message)
+		const encodedMessage = encodeURIComponent(message)
+		const encodedName = encodeURIComponent(localStorage.getItem("name"))
+		const encodedPw = encodeURIComponent(localStorage.getItem("pw"))
 		const res = await fetch(
-			`http://${CHAT_SERVER_URL}/chat?message=${encoded}`,
+			`http://${CHAT_SERVER_URL}/chat?message=${encodedMessage}&name=${encodedName}&pw=${encodedPw}`,
 			{
 				method: "POST",
 			},
