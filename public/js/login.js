@@ -1,6 +1,6 @@
-async function doLogin(username) {
+async function doLogin(username, pw) {
 	try {
-		await chat.login(username)
+		await chat.login(username, pw)
 		document.cookie = "loggedIn=true; max-age:60"
 		document.cookie = "username=" + username
 		var x = document.cookie

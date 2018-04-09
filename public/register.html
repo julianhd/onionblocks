@@ -40,9 +40,10 @@
         console.log("here");
         //get the message SOMEHOW
         var pls = document.getElementById('username').value;
+        var pw = document.getElementById('password').value;
         try {
             document.getElementById("msgLog").innerHTML = "<h2>Welcome!</h2><div class=\"cs-loader\"> <div class=\"cs-loader-inner\"> <label>	●</label><label>	●</label><label>	●</label><label>	●</label><label>	●</label><label>	●</label> </div ></div >";
-            await chat.register(pls);
+            await chat.register(pls, pw);
             console.log(`Registered as '${pls}'`)
             document.getElementById("msgLog").innerHTML = "<h2>Thank you for registering, " + pls + "! </h2> <div align=center><p>Enjoy OnionsBlocks!  <div><button style=\"padding=0px;\" onclick=\"location.href = '/login.html';\">Login</button></div></div>";
             //  window.location.assign("index.html");
@@ -76,7 +77,6 @@
                     </p>
                 </form>
             </div>
-
 
         </div>
 

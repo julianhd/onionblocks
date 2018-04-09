@@ -34,10 +34,11 @@
         event.preventDefault();
         //get the message SOMEHOW
         username = document.getElementById('username').value;
+        pw = document.getElementById('password').value
         try {
-            await chat.login(username);
+            await chat.login(username, pw);
             console.log(`Signed in as '${username}'`);
-            doLogin(username);
+            doLogin(username, pw);
             window.location.assign("messages.html");
         } catch (error) {
             // Login error occurred

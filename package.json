@@ -38,10 +38,14 @@
 		]
 	},
 	"dependencies": {
+		"bcrypt-nodejs": "0.0.3",
+		"body-parser": "^1.18.2",
+		"connect": "^3.6.6",
 		"cors": "^2.8.4",
 		"express": "^4.16.3",
 		"finalhandler": "^1.1.1",
 		"node-rsa": "^0.4.2",
+		"random-int": "^1.0.0",
 		"serve-static": "^1.13.2",
 		"ws": "^5.1.0"
 	},
