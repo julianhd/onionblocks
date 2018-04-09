@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>About</title>
+    <link rel="stylesheet" href="style/style.css">
+    <script src="/js/chat.js"></script>
+    <script src="/js/login.js"></script>
+    <script>
+        checkLogin();
+
+        function deleteCookies() {
+            console.log("ok mais");
+            document.cookie = "loggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+    </script>
+</head>
+
+<header>
+    <div class="header-flex-container">
+        <div id="textbox">
+            <h2 style="font-family: OpenSansBold; text-align: left; padding-right:10px;">OnionBlocks</h2>
+        </div>
+        <div id="textbox">
+            <ul>
+                <li>
+                    <a href="/" href="">Home</a>
+                </li>
+                <li>
+                    <a href="about.html">About</a>
+                </li>
+
+            </ul>
+        </div>
+
+    </div>
+</header>
+
+<body>
+    <div class="main-flex-container">
+
+        <div class="msgLog">
+            <h2>About</h2>
+            <div style="width:75%; text-align: center; margin:auto;">
+                OnionBlocks lets users chat with each other without revealing their real identity. This is accomplished by routing messages
+                through intermediary nodes to hide the IP address of the sender. Each node only knows the address of the
+                next node to forward the message to. The message itself is encrypted and is only revealed to the final node.
+                <br>
+                <br>The network enables pseudonymous verification of participants using public keys stored on a blockchain. This
+                ensures that every user will always be the same person on the network, and nobody else can impersonate their
+                name. The chat history is also saved on the blockchain, to provide a tamper-resistant record of messages.
+
+            </div>
+            <br>
+            <br>
+
+            <div id="mais" class="about-flex-container">
+                <div>
+                    <button id="about" onclick="location.href = '/login.html';">Login</button>
+                </div>
+                <div>
+                    <button id="about" onclick="location.href = '/register.html';">Register</button>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div>
+            <form>
+                <div class="input-flex-container">
+
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <footer>OnionBlocks &copy; 2018</footer>
+    </div>
+
+</html>

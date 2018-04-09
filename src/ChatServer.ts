@@ -13,12 +13,14 @@ import onionRouteRequest from "./onionRouteRequest"
 
 interface ServerUser extends User {
 	private: string
+	password: string
 }
 
 class ChatServer {
 	public readonly server: http.Server
 	private user: ServerUser | null
-
+	
+	private salt: string | null
 	private websockets = new Set<WebSocket>()
 
 	private blockchain = new Blockchain(null, block => {
@@ -31,11 +33,17 @@ class ChatServer {
 	constructor() {
 		const app = express()
 		app.use(cors())
+
+		const bodyParser = require('body-parser');
+		app.use(bodyParser.urlencoded({extended: true}))
+		
 		app.post("/register", async (req, res) => {
-			const { name } = req.query
+			const name = req.query.name
+			const pw = req.query.pw
 			console.log(`User '${name}' registering`)
+			console.log(`with password '${pw}'`)
 			try {
-				await this.register(name)
+				await this.register(name, pw)
 				res.end()
 			} catch (error) {
 				res.status(401).end()
@@ -43,10 +51,12 @@ class ChatServer {
 			}
 		})
 		app.post("/login", async (req, res) => {
-			const { name } = req.query
+			const name = req.query.name
+			const pw = req.query.pw
 			console.log(`User '${name}' logging in`)
+			console.log(`with password '${pw}'`)
 			try {
-				await this.login(name)
+				await this.login(name, pw)
 				res.end()
 			} catch (error) {
 				res.status(401).end()
@@ -79,6 +89,7 @@ class ChatServer {
 			})
 		})
 		this.user = null
+		this.salt = null
 	}
 
 	/**
@@ -113,8 +124,14 @@ class ChatServer {
 	 * Creates a new RSA key and adds the user to the blockchain using onion routing.
 	 *
 	 * @param name username
+	 * @param pw password
 	 */
-	async register(name: string) {
+	async register(name: string, pw: string) {
+		var bcrypt = require('bcrypt-nodejs')
+
+		this.salt = bcrypt.genSaltSync()
+		var hashedPw = bcrypt.hashSync(pw, this.salt)
+
 		var rsa = require("node-rsa")
 		var keys = new rsa({ b: 256 })
 
@@ -143,6 +160,7 @@ class ChatServer {
 			type: "user",
 			timestamp: Date.now(),
 			name: name,
+			password: hashedPw,
 			private: privateKey,
 			public: publicKey,
 		}
@@ -166,13 +184,29 @@ class ChatServer {
 	 * Loads the RSA key for the given username.
 	 *
 	 * @param name username
+	 * @param pw password
 	 */
-	async login(name: string) {
+	async login(name: string, pw: string) {
 		var fileSystem = require("fs")
 		var filePath = "./data/" + name + ".json"
 
-		let rawData = fileSystem.readFileSync(filePath)
-		this.user = JSON.parse(rawData)
+		let rawData = fileSystem.readFileSync(filePath, {encoding: "utf8"})
+		var obj = JSON.parse(rawData)
+		var hashedPw = obj.password
+		console.log(hashedPw)
+
+		var bcrypt = require('bcrypt-nodejs')
+		console.log(pw + " " + hashedPw)
+
+		var samePw = bcrypt.compareSync(pw, hashedPw)
+		if (samePw) {
+			this.user = JSON.parse(rawData)
+			console.log(this.user)
+		}
+		else {
+			throw new Error("Invalid password")
+		}
+		
 	}
 
 	/**
@@ -200,7 +234,7 @@ class ChatServer {
 				signature: key.sign(chatBuffer, 'base64')
 			}
 
-			// TODO Remove this temporary hack
+			// TODO: Remove this temporary hack
 			this.broadcastChat(chat)
 
 			await onionRouteRequest(entity)
