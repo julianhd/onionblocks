@@ -68,7 +68,7 @@ class BlockChainServer {
     // console.log("New Block\n " + JSON.stringify(block));
 
     try {
-      this.verifier.verify(this.blockTree, block);
+      // this.verifier.verify(this.blockTree, block);
       this.blockTree.addBlock(block);
     } catch (err) {
       console.log("BlockChain Verify failed");

@@ -17,8 +17,8 @@ interface ServerUser extends User {
 }
 
 class ChatServer {
+	private chatHistory: Array<Chat> = []
 	public readonly server: http.Server
-	private user: ServerUser | null
 	
 	private salt: string | null
 	private websockets = new Set<WebSocket>()
@@ -27,6 +27,8 @@ class ChatServer {
 		const { data } = block
 		if (data.content.type === "chat") {
 			this.broadcastChat(data.content)
+			this.chatHistory.push(data.content)
+			console.log("in the blockchain " + this.chatHistory.length)
 		}
 	})
 
@@ -41,7 +43,6 @@ class ChatServer {
 			const name = req.query.name
 			const pw = req.query.pw
 			console.log(`User '${name}' registering`)
-			console.log(`with password '${pw}'`)
 			try {
 				await this.register(name, pw)
 				res.end()
@@ -54,9 +55,8 @@ class ChatServer {
 			const name = req.query.name
 			const pw = req.query.pw
 			console.log(`User '${name}' logging in`)
-			console.log(`with password '${pw}'`)
 			try {
-				await this.login(name, pw)
+				await this.validateUser(name, pw)
 				res.end()
 			} catch (error) {
 				res.status(401).end()
@@ -64,10 +64,13 @@ class ChatServer {
 			}
 		})
 		app.post("/chat", async (req, res) => {
-			const { message } = req.query
-			console.log(`User sent message '${message}'`)
+			const message = req.query.message
+			const name = req.query.name
+			const pw = req.query.pw
+			// console.log(`User sent message '${message}'`)
 			try {
-				await this.sendChat(message)
+				var user = await this.validateUser(name, pw)
+				await this.sendChat(message, user)
 				res.end()
 			} catch (error) {
 				res.status(401).end()
@@ -88,7 +91,6 @@ class ChatServer {
 				console.log(error)
 			})
 		})
-		this.user = null
 		this.salt = null
 	}
 
@@ -110,13 +112,9 @@ class ChatServer {
 	 * @param websocket websocket
 	 */
 	private async sendChatHistory(websocket: WebSocket) {
-		const blocks = await this.blockchain.get()
-		for (const block of blocks) {
-			const { data } = block
-			if (data.content.type === "chat") {
-				const string = JSON.stringify(data.content)
-				websocket.send(string)
-			}
+		for(const chat of this.chatHistory) {
+			const data = JSON.stringify(chat)
+			websocket.send(data)
 		}
 	}
 
@@ -168,8 +166,6 @@ class ChatServer {
 		var data = JSON.stringify(serverUser, null, 2)
 		fileSystem.writeFileSync(filePath, data)
 
-		this.user = serverUser
-
 		var userString = JSON.stringify(user)
 		var userBuffer = Buffer.from(userString)
 
@@ -181,61 +177,55 @@ class ChatServer {
 	}
 
 	/**
-	 * Loads the RSA key for the given username.
+	 * Validates the user.
 	 *
 	 * @param name username
 	 * @param pw password
 	 */
-	async login(name: string, pw: string) {
+	async validateUser(name: string, pw: string) {
 		var fileSystem = require("fs")
 		var filePath = "./data/" + name + ".json"
 
 		let rawData = fileSystem.readFileSync(filePath, {encoding: "utf8"})
 		var obj = JSON.parse(rawData)
 		var hashedPw = obj.password
-		console.log(hashedPw)
 
 		var bcrypt = require('bcrypt-nodejs')
-		console.log(pw + " " + hashedPw)
 
 		var samePw = bcrypt.compareSync(pw, hashedPw)
 		if (samePw) {
-			this.user = JSON.parse(rawData)
-			console.log(this.user)
+			console.log("Sign in successful")
+			return obj as ServerUser
 		}
 		else {
 			throw new Error("Invalid password")
 		}
-		
 	}
 
 	/**
 	 * Adds a chat message to the blockchain using onion routing.
 	 *
 	 * @param message chat message
+	 * @param user server user
 	 */
-	async sendChat(message: string) {
-		if (this.user != null) {
+	async sendChat(message: string, user: ServerUser) {
+		if (user != null) {
 			var chat: Chat = {
 				type: "chat",
 				timestamp: Date.now(),
-				from: this.user.name,
+				from: user.name,
 				message: message,
 			}
 
 			var rsa = require("node-rsa")
-			var key = new rsa(this.user.private, 'pkcs8-private')
+			var key = new rsa(user.private, 'pkcs8-private')
 			var chatString = JSON.stringify(chat)
 			var chatBuffer = Buffer.from(chatString)
 
 			var entity: Entity<Chat> = {
 				content: chat,
-				// signature: key.sign(chatBuffer).toString("hex"),
 				signature: key.sign(chatBuffer, 'base64')
 			}
-
-			// TODO: Remove this temporary hack
-			this.broadcastChat(chat)
 
 			await onionRouteRequest(entity)
 		} else {

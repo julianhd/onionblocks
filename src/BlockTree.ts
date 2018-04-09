@@ -201,8 +201,8 @@ export default class BlockchainTree {
     })
     var nodeStrList = JSON.stringify(this.struct.nodeList);
     var str = `blockchain:\n ${chainStrList}||\nnodeList:\n ${nodeStrList}`;
-    console.log("Displaying tree");
-    console.log(str);
+    // console.log("Displaying tree");
+    // console.log(str);
   }
 
   // getRouteFromNodeToRoot(uuid: string) {
