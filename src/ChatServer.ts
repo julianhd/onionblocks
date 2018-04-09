@@ -9,15 +9,7 @@ import Blockchain, {
 	User,
 } from "./Blockchain"
 import cors from "cors"
-
-/**
- * Dummy onion request function.
- *
- * @param entity
- */
-function OnionRoutingRequest(entity: Entity) {
-	console.log(entity)
-}
+import onionRouteRequest from "./onionRouteRequest"
 
 interface ServerUser extends User {
 	private: string
@@ -181,13 +173,11 @@ class ChatServer {
 		var userString = JSON.stringify(user)
 		var userBuffer = Buffer.from(userString)
 
-		var entity: Entity = {
-			object: user,
+		var entity: Entity<User> = {
+			content: user,
 			signature: keys.sign(userBuffer).toString("hex"),
 		}
-
-		// TODO: Call the real OnionRoutingRequest
-		OnionRoutingRequest(entity)
+		await onionRouteRequest(entity)
 	}
 
 	/**
@@ -234,21 +224,20 @@ class ChatServer {
 			}
 
 			var rsa = require("node-rsa")
-			var key = new rsa(this.user.private)
-
+			var key = new rsa(this.user.private, 'pkcs8-private')
 			var chatString = JSON.stringify(chat)
 			var chatBuffer = Buffer.from(chatString)
 
-			var entity: Entity = {
-				object: chat,
-				signature: key.sign(chatBuffer).toString("hex"),
+			var entity: Entity<Chat> = {
+				content: chat,
+				// signature: key.sign(chatBuffer).toString("hex"),
+				signature: key.sign(chatBuffer, 'base64')
 			}
 
 			// TODO: Remove this temporary hack
 			this.broadcastChat(chat)
 
-			// TODO: Call the real OnionRoutingRequest
-			OnionRoutingRequest(entity)
+			await onionRouteRequest(entity)
 		} else {
 			throw new Error("Username is invalid")
 		}
