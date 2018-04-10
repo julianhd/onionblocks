@@ -11,6 +11,8 @@ import { Request, Relay, Exit } from "./request"
 import onionRouteRequest from "./onionRouteRequest"
 import Miner from "./Miner"
 
+const { ONIONBLOCKS_PEER_NODE_HOSTNAME } = process.env
+
 /**
 The PeerNode Server,
 This server relays messages from one Node to another
@@ -18,24 +20,24 @@ While progressively decrypting the message
 */
 class PeerNodeServer {
 	public readonly server: http.Server
-	private rsa: NodeRSA;
+	private rsa: NodeRSA
 
 	constructor(private serverPort: number) {
-		this.rsa = new NodeRSA();		
+		this.rsa = new NodeRSA()
 		this.init()
 
 		const app = express()
-		app.use(bodyParser.json());
+		app.use(bodyParser.json())
 
 		// Handle POST requests
 		app.post("/request", async (req, res) => {
 			try {
-				const requestMessage: Request = req.body;
+				const requestMessage: Request = req.body
 				const decryptedMessage: Relay | Exit<any> = this.rsa.decrypt(
 					requestMessage.encrypted,
 					"json",
 				)
-				console.log("PeerNodeServer: post decryptedMessage");
+				console.log("PeerNodeServer: post decryptedMessage")
 
 				if (decryptedMessage.type == "relay") {
 					// ------ TO BE TESTED --------
@@ -48,7 +50,6 @@ class PeerNodeServer {
 						json: true,
 						body: nextRequest,
 					})
-
 				} else if (decryptedMessage.type == "exit") {
 					const miner = new Miner()
 					const block = await miner.mine(decryptedMessage.content)
@@ -67,7 +68,7 @@ class PeerNodeServer {
 	init() {
 		var fileName = "./data/onion" + this.serverPort + ".json"
 
-		var exists = fs.existsSync(fileName);
+		var exists = fs.existsSync(fileName)
 
 		if (exists) {
 			console.log("JSON exists, loading " + fileName)
@@ -83,7 +84,7 @@ class PeerNodeServer {
 			console.log("Generating keys...")
 
 			// Generate RSA key pair.
-			this.rsa.generateKeyPair(512);
+			this.rsa.generateKeyPair(512)
 			var publicKey = this.rsa.exportKey("pkcs8-public") //export public key
 			var privateKey = this.rsa.exportKey("pkcs8-private") //export private key
 			console.log("Generated key pair")
@@ -101,14 +102,13 @@ class PeerNodeServer {
 		setInterval(this.timerRun, 30000)
 	}
 
-
 	timerRun = async () => {
-			console.log("port " + this.serverPort);
+		console.log("port " + this.serverPort)
 		// console.log("Created Entity")
 		const node: OnionNode = {
 			type: "node",
 			timestamp: Date.now(),
-			host: "localhost",
+			host: ONIONBLOCKS_PEER_NODE_HOSTNAME || os.hostname(),
 			port: this.serverPort,
 			public: this.rsa.exportKey("pkcs8-public"),
 		}
@@ -128,7 +128,9 @@ class PeerNodeServer {
 		try {
 			await blockchain.post(block)
 		} catch (err) {
-			console.log("PeerNodeServer: Unable to post the block -- " + JSON.stringify(err));
+			console.log(
+				"PeerNodeServer: Unable to post the block -- " + JSON.stringify(err),
+			)
 		}
 	}
 }

@@ -10,7 +10,7 @@
 	"scripts": {
 		"precommit": "lint-staged",
 		"test": "jest --forceExit",
-		"start": "nodemon"
+		"start": "ONIONBLOCKS_PEER_NODE_HOSTNAME=localhost nodemon"
 	},
 	"private": true,
 	"devDependencies": {
