@@ -5,6 +5,12 @@ import { Block } from './Blockchain';
 import NodeRSA from "node-rsa";
 import BlockchainTree from "./BlockTree"
 
+export class MissingBlockError extends Error {
+  constructor(...args: any[]) {
+      super(...args);
+      Error.captureStackTrace(this, MissingBlockError);
+  }
+}
 
 export default class BlockchainVerifier {
     names: string[] = [];   // Keep track of all the names of users.
@@ -27,7 +33,12 @@ export default class BlockchainVerifier {
           throw console.error("The hash doesn't start with 000.");
         }
 
-        if ((parent == null && block.data.previous_uuid != null) || (parent != null && parent.data.uuid != block.data.previous_uuid)) {
+        if (parent == null && block.data.previous_uuid != null) {
+          throw new MissingBlockError("A block might be missing from the chain");
+        }
+
+        // TODO this might be useless but for now let it there: Check if time permit
+        if (parent != null && parent.data.uuid != block.data.previous_uuid) {
           throw console.error("The block isn't a child of the parent");
         }
 

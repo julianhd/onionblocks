@@ -26,6 +26,7 @@ export interface BlockchainTreeStruct {
 
 export default class BlockchainTree {
   private struct: BlockchainTreeStruct;
+  private listeners: Array<(block: Block<BlockContent>) => any>;
 
   /**
    * Create a BlockchainTree.
@@ -35,6 +36,7 @@ export default class BlockchainTree {
    * @param {BlockchainTreeStruct} [struct] : (Optional) Struct to build the tree with
    */
   constructor(struct?: BlockchainTreeStruct) {
+    this.listeners = [];
     if (!struct) {
       this.struct = {
         blockchain : [],
@@ -74,6 +76,12 @@ export default class BlockchainTree {
     }
   }
 
+  private async notifyListeners(block: Block<BlockContent>) {
+    this.listeners.forEach(function (callback) {
+      callback(block);
+    })
+  }
+
   /**
    * Adds a new block to the blockchain tree.
    *
@@ -84,7 +92,7 @@ export default class BlockchainTree {
       this.validateBlock(block);
       // Don't add if this block's uuid exists
       if (this.uuidExists(block.data.uuid)) {
-        throw new Error("Block exists in this struct: Existing UUID");
+        return;
       }
       // console.log(block.data.previous_uuid);
       let parentPos = (block.data.previous_uuid) ? this.getUUIDPos(block.data.previous_uuid) : -1;
@@ -109,6 +117,8 @@ export default class BlockchainTree {
       this.updateParentChild(parentPos, pos);
 
       this.struct.uuidMap[block.data.uuid] = pos;
+
+      this.notifyListeners(block);
   }
 
   /**
@@ -193,6 +203,17 @@ export default class BlockchainTree {
     }
   }
 
+  /**
+   * Listen for any new block to the blockchain
+   *
+   * @param callback : Function which take a block, new block added
+   * @returns {Void}
+   */
+  listen(callback: (block: Block<BlockContent>) => any) {
+    this.listeners.push(callback);
+  }
+
+
   // TODO change to the real toString .. no time
   displayNicely() {
     var chainStrList: Array<string> = [];
@@ -201,28 +222,9 @@ export default class BlockchainTree {
     })
     var nodeStrList = JSON.stringify(this.struct.nodeList);
     var str = `blockchain:\n ${chainStrList}||\nnodeList:\n ${nodeStrList}`;
-    // console.log("Displaying tree");
-    // console.log(str);
+    console.log("Displaying tree");
+    console.log(str);
   }
-
-  // getRouteFromNodeToRoot(uuid: string) {
-  //   return this.getRouteFromNodeToAncestor(uuid, this.struct.blockchain[0].data.uuid);
-  // }
-  //
-  // getRouteFromNodeToAncestor(uuidFrom: string, uuidAncestor: string) {
-  //   if (!this.uuidExists(uuidFrom)) {
-  //     throw new Error("Invalid starting uuid");
-  //   }
-  //   if (!this.uuidExists(uuidAncestor)) {
-  //     throw new Error("Invalid ancestor uuid");
-  //   }
-  //   let route = [];
-  //   let childPos = this.getUUIDPos(uuidFrom);
-  //   let ancestorPos = this.getUUIDPos(uuidAncestor);
-  //
-  //   while ()
-  //
-  // }
 
   getStruct() {
     return this.struct;
