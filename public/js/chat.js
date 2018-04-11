@@ -1,11 +1,11 @@
-const CHAT_SERVER_URL = "localhost:8081"
+const CHAT_SERVER_URL = window.location.host
 
 window.chat = {
 	async register(name, pw) {
 		const encodedName = encodeURIComponent(name)
 		const encodedPw = encodeURIComponent(pw)
 		const res = await fetch(
-			`http://${CHAT_SERVER_URL}/register?name=${encodedName}&pw=${encodedPw}`,
+			`http://${CHAT_SERVER_URL}/api/register?name=${encodedName}&pw=${encodedPw}`,
 			{
 				method: "POST",
 			},
@@ -20,7 +20,7 @@ window.chat = {
 		const encodedName = encodeURIComponent(name)
 		const encodedPw = encodeURIComponent(pw)
 		const res = await fetch(
-			`http://${CHAT_SERVER_URL}/login?name=${encodedName}&pw=${encodedPw}`,
+			`http://${CHAT_SERVER_URL}/api/login?name=${encodedName}&pw=${encodedPw}`,
 			{
 				method: "POST",
 			},
@@ -36,7 +36,7 @@ window.chat = {
 		const encodedName = encodeURIComponent(localStorage.getItem("name"))
 		const encodedPw = encodeURIComponent(localStorage.getItem("pw"))
 		const res = await fetch(
-			`http://${CHAT_SERVER_URL}/chat?message=${encodedMessage}&name=${encodedName}&pw=${encodedPw}`,
+			`http://${CHAT_SERVER_URL}/api/chat?message=${encodedMessage}&name=${encodedName}&pw=${encodedPw}`,
 			{
 				method: "POST",
 			},

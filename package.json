@@ -7,10 +7,17 @@
 		"node": "~9.5.0",
 		"npm": "~5.6.0"
 	},
+	"files": [
+		"public",
+		"lib",
+		"scripts"
+	],
 	"scripts": {
 		"precommit": "lint-staged",
 		"test": "jest --forceExit",
-		"start": "ONIONBLOCKS_PEER_NODE_HOSTNAME=localhost nodemon"
+		"start": "ONIONBLOCKS_PEER_NODE_HOSTNAME=localhost nodemon",
+		"build": "tsc",
+		"prepublish": "npm run build"
 	},
 	"private": true,
 	"devDependencies": {
@@ -22,6 +29,7 @@
 		"@types/node": "^9.4.6",
 		"@types/node-rsa": "^0.4.1",
 		"@types/serve-static": "^1.13.1",
+		"@types/uuid": "^3.4.3",
 		"@types/ws": "^4.0.1",
 		"husky": "^0.14.3",
 		"jest": "^22.2.2",

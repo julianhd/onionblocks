@@ -7,10 +7,10 @@ import dns from "dns"
 
 const PEER_UPDATE_MS = 30000
 const MASTER_PORT = 8082
-const { MASTER_HOST = "172.17.0.2" } = process.env
+const { MASTER_HOST = "10.162.0.2" } = process.env
 
 const staticServer = createStaticServer()
-staticServer.listen(8080)
+staticServer.listen(80)
 
 const chatServer = createChatServer()
 chatServer.listen(8081)

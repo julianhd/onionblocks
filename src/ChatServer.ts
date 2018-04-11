@@ -8,8 +8,9 @@ import Blockchain, {
 	Entity,
 	User,
 } from "./Blockchain"
-import cors from "cors"
 import onionRouteRequest from "./onionRouteRequest"
+import serveStatic from "serve-static"
+import bodyParser from "body-parser"
 
 interface ServerUser extends User {
 	private: string
@@ -19,7 +20,7 @@ interface ServerUser extends User {
 class ChatServer {
 	private chatHistory: Array<Chat> = []
 	public readonly server: http.Server
-	
+
 	private salt: string | null
 	private websockets = new Set<WebSocket>()
 
@@ -34,12 +35,10 @@ class ChatServer {
 
 	constructor() {
 		const app = express()
-		app.use(cors())
+		app.use(bodyParser.urlencoded({ extended: true }))
+		app.use(serveStatic("./public"))
 
-		const bodyParser = require('body-parser');
-		app.use(bodyParser.urlencoded({extended: true}))
-		
-		app.post("/register", async (req, res) => {
+		app.post("/api/register", async (req, res) => {
 			const name = req.query.name
 			const pw = req.query.pw
 			console.log(`User '${name}' registering`)
@@ -51,7 +50,7 @@ class ChatServer {
 				throw error
 			}
 		})
-		app.post("/login", async (req, res) => {
+		app.post("/api/login", async (req, res) => {
 			const name = req.query.name
 			const pw = req.query.pw
 			console.log(`User '${name}' logging in`)
@@ -63,7 +62,7 @@ class ChatServer {
 				throw error
 			}
 		})
-		app.post("/chat", async (req, res) => {
+		app.post("/api/chat", async (req, res) => {
 			const message = req.query.message
 			const name = req.query.name
 			const pw = req.query.pw
@@ -112,7 +111,7 @@ class ChatServer {
 	 * @param websocket websocket
 	 */
 	private async sendChatHistory(websocket: WebSocket) {
-		for(const chat of this.chatHistory) {
+		for (const chat of this.chatHistory) {
 			const data = JSON.stringify(chat)
 			websocket.send(data)
 		}
@@ -125,7 +124,7 @@ class ChatServer {
 	 * @param pw password
 	 */
 	async register(name: string, pw: string) {
-		var bcrypt = require('bcrypt-nodejs')
+		var bcrypt = require("bcrypt-nodejs")
 
 		this.salt = bcrypt.genSaltSync()
 		var hashedPw = bcrypt.hashSync(pw, this.salt)
@@ -186,18 +185,17 @@ class ChatServer {
 		var fileSystem = require("fs")
 		var filePath = "./data/" + name + ".json"
 
-		let rawData = fileSystem.readFileSync(filePath, {encoding: "utf8"})
+		let rawData = fileSystem.readFileSync(filePath, { encoding: "utf8" })
 		var obj = JSON.parse(rawData)
 		var hashedPw = obj.password
 
-		var bcrypt = require('bcrypt-nodejs')
+		var bcrypt = require("bcrypt-nodejs")
 
 		var samePw = bcrypt.compareSync(pw, hashedPw)
 		if (samePw) {
 			console.log("Sign in successful")
 			return obj as ServerUser
-		}
-		else {
+		} else {
 			throw new Error("Invalid password")
 		}
 	}
@@ -218,13 +216,13 @@ class ChatServer {
 			}
 
 			var rsa = require("node-rsa")
-			var key = new rsa(user.private, 'pkcs8-private')
+			var key = new rsa(user.private, "pkcs8-private")
 			var chatString = JSON.stringify(chat)
 			var chatBuffer = Buffer.from(chatString)
 
 			var entity: Entity<Chat> = {
 				content: chat,
-				signature: key.sign(chatBuffer, 'base64')
+				signature: key.sign(chatBuffer, "base64"),
 			}
 
 			await onionRouteRequest(entity)
