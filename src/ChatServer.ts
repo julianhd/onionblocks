@@ -38,6 +38,9 @@ class ChatServer {
 		app.use(bodyParser.urlencoded({ extended: true }))
 		app.use(serveStatic("./public"))
 
+		app.get("/api/ping", (req, res) => {
+			res.end("pong")
+		})
 		app.post("/api/register", async (req, res) => {
 			const name = req.query.name
 			const pw = req.query.pw
