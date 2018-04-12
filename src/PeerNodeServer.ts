@@ -103,12 +103,14 @@ class PeerNodeServer {
 	timerRun = async () => {
 		console.log("port " + this.serverPort)
 		// console.log("Created Entity")
+
+		const publicKey = this.rsa.exportKey("pkcs8-public")
 		const node: OnionNode = {
 			type: "node",
 			timestamp: Date.now(),
 			host: ONIONBLOCKS_PEER_NODE_HOSTNAME || os.hostname(),
 			port: this.serverPort,
-			public: this.rsa.exportKey("pkcs8-public"),
+			public: publicKey,
 		}
 
 		const nodeString = JSON.stringify(node)
@@ -118,6 +120,7 @@ class PeerNodeServer {
 		const entity: Entity<OnionNode> = {
 			content: node,
 			signature: this.rsa.sign(nodeBuffer).toString("hex"),
+			public: publicKey,
 		}
 
 		const miner = new Miner(this.blockchain)
@@ -135,7 +138,10 @@ class PeerNodeServer {
 /**
  * Returns an HTTP server that handles relaying encrypted messages
  */
-export default function createPeerNodeServer(serverPort: number, blockchain: Blockchain) {
+export default function createPeerNodeServer(
+	serverPort: number,
+	blockchain: Blockchain,
+) {
 	const node = new PeerNodeServer(serverPort, blockchain)
 	return node.server
 }

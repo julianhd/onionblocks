@@ -17,7 +17,7 @@
 		"test": "jest --forceExit",
 		"start": "ONIONBLOCKS_PEER_NODE_HOSTNAME=localhost nodemon",
 		"build": "tsc",
-		"prepublish": "npm run build"
+		"prepare": "npm run build"
 	},
 	"private": true,
 	"devDependencies": {

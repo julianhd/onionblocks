@@ -7,10 +7,12 @@ import Blockchain, {
 	BlockContent,
 	Entity,
 	User,
+	BlockData,
 } from "./Blockchain"
 import onionRouteRequest from "./onionRouteRequest"
 import serveStatic from "serve-static"
 import bodyParser from "body-parser"
+import crypto from "crypto"
 
 interface ServerUser extends User {
 	private: string
@@ -18,7 +20,7 @@ interface ServerUser extends User {
 }
 
 class ChatServer {
-	private chatHistory: Array<Chat> = []
+	private chatHistory: Array<BlockData<Chat>> = []
 	public readonly server: http.Server
 
 	private salt: string | null
@@ -28,8 +30,8 @@ class ChatServer {
 		blockchain.listenBlocks(block => {
 			const { data } = block
 			if (data.content.type === "chat") {
-				this.broadcastChat(data.content)
-				this.chatHistory.push(data.content)
+				this.broadcastChat(data as BlockData<Chat>)
+				this.chatHistory.push(data as BlockData<Chat>)
 				console.log("in the blockchain " + this.chatHistory.length)
 			}
 		})
@@ -101,9 +103,13 @@ class ChatServer {
 	 *
 	 * @param chat chat entity
 	 */
-	private broadcastChat(chat: Chat) {
+	private broadcastChat(block: BlockData<Chat>) {
+		const object = Object.assign(
+			{ hash: keyShortHash(block.public) },
+			block.content,
+		)
 		for (const websocket of this.websockets) {
-			const data = JSON.stringify(chat)
+			const data = JSON.stringify(object)
 			websocket.send(data)
 		}
 	}
@@ -114,8 +120,12 @@ class ChatServer {
 	 * @param websocket websocket
 	 */
 	private async sendChatHistory(websocket: WebSocket) {
-		for (const chat of this.chatHistory) {
-			const data = JSON.stringify(chat)
+		for (const block of this.chatHistory) {
+			const object = Object.assign(
+				{ hash: keyShortHash(block.public) },
+				block.content,
+			)
+			const data = JSON.stringify(object)
 			websocket.send(data)
 		}
 	}
@@ -174,6 +184,7 @@ class ChatServer {
 		var entity: Entity<User> = {
 			content: user,
 			signature: keys.sign(userBuffer).toString("hex"),
+			public: publicKey,
 		}
 		await onionRouteRequest(entity, this.blockchain)
 	}
@@ -226,6 +237,7 @@ class ChatServer {
 			var entity: Entity<Chat> = {
 				content: chat,
 				signature: key.sign(chatBuffer, "base64"),
+				public: user.public,
 			}
 
 			await onionRouteRequest(entity, this.blockchain)
@@ -241,4 +253,24 @@ class ChatServer {
 export default function createChatServer(blockChain: Blockchain) {
 	const chat = new ChatServer(blockChain)
 	return chat.server
+}
+
+// Check for hash collisions
+const keyHashes = new Map<string, string>()
+
+function keyShortHash(key: string) {
+	const hash = crypto.createHash("sha256")
+	hash.update(key)
+	const long = hash.digest("hex")
+	const short = long.substr(0, 6)
+
+	if (keyHashes.has(long)) {
+		if (keyHashes.get(long) != short) {
+			throw new Error("Hash collision!")
+		}
+	} else {
+		keyHashes.set(long, short)
+	}
+
+	return short
 }
