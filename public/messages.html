@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <div class="msgLog">
+        <div class="msgLog" id="msgLog">
             <div style="max-height:50%;">
                 <div id="beginning" style="color:darkgray">This is the beginning of your chat history.</div>
                 <br>
@@ -113,6 +113,12 @@
 
                             var currentDiv = document.getElementById("beginning");
                             currentDiv.parentNode.appendChild(newDiv, currentDiv);
+
+                            var msgLog = document.getElementById("msgLog");
+
+                            if (msgLog.scrollHeight >= msgLog.scrollTop || msgLog.scrollTop + msgLog.clientHeight === msgLog.scrollHeight || msgLog.scrollClient == msgLog.scrollHeight) {
+                                msgLog.scrollTop = msgLog.scrollHeight + newDiv.style.height;
+                            }
                         })
                     }
 

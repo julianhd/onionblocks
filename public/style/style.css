@@ -42,14 +42,14 @@ footer {
 }
 
 .msgLog {
-	/* max-height: 60%; */
 	/* margin-top: 10px;*/
 	margin-bottom: 0px;
 	margin-right: 0px;
 	margin-left: 0px;
 	padding: 10px;
 	width: auto;
-	max-height: 60%;
+	/* max-height: 60%; */
+	height: 50%;
 	overflow: auto;
 	color: rgb(0, 0, 0);
 	border: 1px solid #d6d9dc;
