@@ -12,10 +12,11 @@ import uuidv4 from "uuid/v4"
 const app = express()
 
 export default class Miner {
+	constructor(private blockchain: Blockchain) {};
+
 	async mine(entity: Entity<any>) {
 		// get the current blockchain
-		const blockchain = new Blockchain(null) // will have Verifier once it is created
-		const blocks = await blockchain.get()
+		const blocks = await this.blockchain.get() // TODO change to a method which gets the right block
 		// console.log("Miner: blocks -- " + JSON.stringify(blocks));
 		const previous_block = blocks[blocks.length - 1]
 

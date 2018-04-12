@@ -24,16 +24,16 @@ class ChatServer {
 	private salt: string | null
 	private websockets = new Set<WebSocket>()
 
-	private blockchain = new Blockchain(null, block => {
-		const { data } = block
-		if (data.content.type === "chat") {
-			this.broadcastChat(data.content)
-			this.chatHistory.push(data.content)
-			console.log("in the blockchain " + this.chatHistory.length)
-		}
-	})
+	constructor(private blockchain: Blockchain) {
+		blockchain.listenBlocks(block => {
+			const { data } = block
+			if (data.content.type === "chat") {
+				this.broadcastChat(data.content)
+				this.chatHistory.push(data.content)
+				console.log("in the blockchain " + this.chatHistory.length)
+			}
+		})
 
-	constructor() {
 		const app = express()
 		app.use(bodyParser.urlencoded({ extended: true }))
 		app.use(serveStatic("./public"))
@@ -175,7 +175,7 @@ class ChatServer {
 			content: user,
 			signature: keys.sign(userBuffer).toString("hex"),
 		}
-		await onionRouteRequest(entity)
+		await onionRouteRequest(entity, this.blockchain)
 	}
 
 	/**
@@ -228,7 +228,7 @@ class ChatServer {
 				signature: key.sign(chatBuffer, "base64"),
 			}
 
-			await onionRouteRequest(entity)
+			await onionRouteRequest(entity, this.blockchain)
 		} else {
 			throw new Error("Username is invalid")
 		}
@@ -238,7 +238,7 @@ class ChatServer {
 /**
  * Returns an HTTP server that handles sending and receiving chat messages.
  */
-export default function createChatServer() {
-	const chat = new ChatServer()
+export default function createChatServer(blockChain: Blockchain) {
+	const chat = new ChatServer(blockChain)
 	return chat.server
 }

@@ -8,7 +8,6 @@ import got from "got"
 
 import Blockchain, { OnionNode, BlockContent, Entity } from "./Blockchain"
 import { Request, Relay, Exit } from "./request"
-import onionRouteRequest from "./onionRouteRequest"
 import Miner from "./Miner"
 
 const { ONIONBLOCKS_PEER_NODE_HOSTNAME } = process.env
@@ -22,7 +21,7 @@ class PeerNodeServer {
 	public readonly server: http.Server
 	private rsa: NodeRSA
 
-	constructor(private serverPort: number) {
+	constructor(private serverPort: number, private blockchain: Blockchain) {
 		this.rsa = new NodeRSA()
 		this.init()
 
@@ -51,9 +50,8 @@ class PeerNodeServer {
 						body: nextRequest,
 					})
 				} else if (decryptedMessage.type == "exit") {
-					const miner = new Miner()
+					const miner = new Miner(blockchain)
 					const block = await miner.mine(decryptedMessage.content)
-					const blockchain = new Blockchain(null)
 					await blockchain.post(block)
 				}
 				res.end()
@@ -122,11 +120,10 @@ class PeerNodeServer {
 			signature: this.rsa.sign(nodeBuffer).toString("hex"),
 		}
 
-		const miner = new Miner()
+		const miner = new Miner(this.blockchain)
 		const block = await miner.mine(entity)
-		const blockchain = new Blockchain(null)
 		try {
-			await blockchain.post(block)
+			await this.blockchain.post(block)
 		} catch (err) {
 			console.log(
 				"PeerNodeServer: Unable to post the block -- " + JSON.stringify(err),
@@ -138,7 +135,7 @@ class PeerNodeServer {
 /**
  * Returns an HTTP server that handles relaying encrypted messages
  */
-export default function createPeerNodeServer(serverPort: number) {
-	const node = new PeerNodeServer(serverPort)
+export default function createPeerNodeServer(serverPort: number, blockchain: Blockchain) {
+	const node = new PeerNodeServer(serverPort, blockchain)
 	return node.server
 }

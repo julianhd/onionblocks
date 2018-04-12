@@ -12,8 +12,8 @@ const NODE_COUNT = 3
 
 export default async function onionRouteRequest<T extends BlockContent>(
 	entity: Entity<T>,
+	blockchain: Blockchain
 ) {
-	const blockchain = new Blockchain(null)
 	const blocks = await blockchain.get()
 	const [n1, n2, n3] = chooseRoutingNodes(blocks)
 

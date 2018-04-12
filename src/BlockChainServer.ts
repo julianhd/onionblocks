@@ -40,8 +40,8 @@ export default class BlockChainServer {
    * @param {string} host : This server host Address
    * @param {number} port : This server port
    */
-  constructor(updateInterval: number, host: string, port: number) {
-    this.blockTree = new BlockchainTree();
+  constructor(blockTree: BlockchainTree, updateInterval: number, host: string, port: number) {
+    this.blockTree = blockTree;
     this.verifier = new BlockchainVerifier();
     this.peers = new PeerSet();
     this.thisPeer = {

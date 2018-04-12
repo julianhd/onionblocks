@@ -63,28 +63,8 @@ export default class Blockchain {
 	private uuids: Set<string> = new Set<string>()
 	constructor(
 		private verifier: Verifier | null,
-		private callback?: BlockHandlerCallback,
-	) {
-		process.nextTick(async () => {
-			const blocks = await this.get()
-			if (callback != null) {
-				for (const block of blocks) {
-					callback(block)
-				}
-			}
-		})
-		setInterval(async () => {
-			const blocks = await this.get()
-			if (callback != null) {
-				for(const block of blocks) {
-					if (!this.uuids.has(block.data.uuid)) {
-						callback(block)
-						this.uuids.add(block.data.uuid)
-					}
-				}
-			}
-		}, 500)
-	}
+		private blocktree?: BlockchainTree,
+	) {}
 
 	/**
 	 * Returns all the blocks from the blockchain server.
@@ -112,5 +92,16 @@ export default class Blockchain {
 			body: block,
 			json: true
 		})
+	}
+
+	/**
+	 * Listen for new blocks on the chain
+	 *
+	 * @param {BlockHandlerCallback} callback : Handler for new blocks
+	 */
+	listenBlocks(callback: BlockHandlerCallback) {
+		if(this.blocktree) {
+			this.blocktree.listen(callback);
+		}
 	}
 }
