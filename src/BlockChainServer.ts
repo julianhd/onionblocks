@@ -3,7 +3,7 @@ import express from "express"
 import bodyParser from "body-parser"
 import { Block, BlockContent } from "./Blockchain"
 import BlockchainVerifier, { MissingBlockError } from "./BlockchainVerifier"
-import BlockchainTree from "./BlockTree"
+import BlockchainTree, { BlockchainTreeStruct } from "./BlockTree"
 import PeerSet, { Peer } from "./PeerSet"
 import got from "got"
 
@@ -28,6 +28,7 @@ export default class BlockChainServer {
   private thisPeer: Peer;
 
   private RECOVERY_PEER_COUNT: number = 3;
+  private RECOVERY_BLOCK_COUNT: number = 15;
   private PEER_FETCH_COUNT: number = 3;
   private DEFAULT_TTL: number = 600000; // 10 minutes
 
@@ -40,18 +41,28 @@ export default class BlockChainServer {
    * @param {string} host : This server host Address
    * @param {number} port : This server port
    */
-  constructor(blockTree: BlockchainTree, updateInterval: number, host: string, port: number) {
+  constructor(
+    blockTree: BlockchainTree,
+    updateInterval: number,
+    thisHost: string,
+    thisPort: number,
+    masterHost: string,
+    masterPort: number
+  ) {
     this.blockTree = blockTree;
     this.verifier = new BlockchainVerifier();
     this.peers = new PeerSet();
     this.thisPeer = {
-      address: host,
-      port: port,
+      address: thisHost,
+      port: thisPort,
       ttl: this.DEFAULT_TTL,
       isMaster: false
     };
     this.holdBackQueue = [];
     this.inRecovery = false;
+
+    this.addMasterPeer(masterHost, masterPort);
+    this.initBlockchain();
 
     this.blockTree.listen(this.broadcastBlock.bind(this));
 
@@ -62,7 +73,7 @@ export default class BlockChainServer {
     app.post('/block', async (req, res) => {
       // console.log("BlockchainServer: request post " + JSON.stringify(req.body));
       var status;
-      if (!req.body || !this.addBlock(req.body)) {
+      if (!req.body || !(await this.addBlock(req.body))) {
         status = 400;
       }
       else {
@@ -73,15 +84,38 @@ export default class BlockChainServer {
 
     // Retrieve the blockchain partially or fully
     app.get('/blockchain', (req, res) => {
-      // console.log(req.query);
       var since = req.query.since;
       if (!since) {
         res.json(this.blockTree.getStruct());
       }
       else {
-        res.json(this.blockTree.getChainSince(since));
+        let blocks = {
+          blockchain: this.blockTree.getBlocksSince(since)
+        };
+        res.json(blocks);
       }
     });
+
+    // Retrieve a specific block with a number of ancestors
+    app.get('/blockchain/:uuid', (req, res) => {
+      let uuid = req.params.uuid;
+      let count = Number.parseInt(req.query.count);
+
+      if (!Number.isInteger(count)) {
+        count = 0;
+      }
+
+      if (!uuid) {
+        res.status(400).json({})
+      }
+      else {
+        let block = {
+          blocks: this.blockTree.getBlocksTo(uuid, count)
+        };
+        res.json(block);
+      }
+    });
+
 
     // Returns a list of peers as Array<Peer> parameter count=<count>
     // Returns as an object { "peers" : Array<Peer> }
@@ -119,9 +153,10 @@ export default class BlockChainServer {
    * This method verifies the newly given node with the BlockChainVerifier
    *
    * @param {Block<BlockContent>} block : New Block to add
-   * @returns {Boolean} true if the block was successfully added, false on verification error.
+   * @param {boolean} isRecovery : Set to true so it doesn't try to recover a recovery
+   * @returns {boolean} true if the block was successfully added, false on verification error.
    */
-  private addBlock(block: Block<BlockContent>) {
+  private async addBlock(block: Block<BlockContent>, isRecovery?: boolean) {
     // console.log("New Block\n " + JSON.stringify(block));
 
     // Put the block in holdBackQueue if we're currently recovering from failure.
@@ -131,11 +166,21 @@ export default class BlockChainServer {
     }
     else {
       try {
-        this.verifier.verify(this.blockTree, block);
+        if (!this.blockTree.uuidExists(block.data.uuid)) {
+          this.verifier.verify(this.blockTree, block);
+          this.blockTree.addBlock(block);
+          this.blockTree.displayNicely();
+        }
       } catch(err) {
         if (err instanceof MissingBlockError) {
-          // this.recoverChain(block);
           console.log('MissingBlockError ' + JSON.stringify(err));
+          if (!isRecovery) {
+            await this.recover(block);
+          }
+          else {
+            console.log("BlockChain failed to recover");
+            throw err;
+          }
         }
         else {
           console.log("BlockChain Verify failed");
@@ -143,19 +188,8 @@ export default class BlockChainServer {
           return false;
         }
       }
-      this.blockTree.addBlock(block);
     }
-
-    this.blockTree.displayNicely();
     return true;
-  }
-
-  private recoverChain(fromBlock?: Block<BlockContent>) {
-    this.inRecovery = true;
-    let recoveryPeer = this.peers.getRandomPeerList(this.RECOVERY_PEER_COUNT);
-    // TODO ask for the chain from these until we get the full list
-    // TODO maybe simplify and just get the complete list from one
-    // TODO Check the hold back queue
   }
 
   private async syncPeers() {
@@ -184,6 +218,84 @@ export default class BlockChainServer {
       } catch (err) {
         // TODO maybe add a retry and kill the peer if still dead or if there's more time an exponential backoff
         console.log('BlockChainServer: Error syncing peer with ' + JSON.stringify(peer) + '\nErr: ' + JSON.stringify(err));
+      }
+    }
+  }
+
+  private async recover(fromBlock: Block<BlockContent>) {
+    this.inRecovery = true;
+    let recoveryPeers = this.peers.getRandomPeerList(this.RECOVERY_PEER_COUNT);
+    for (let i in recoveryPeers) {
+      try {
+        if (await this.checkPeerForBlock(fromBlock, recoveryPeers[i])) {
+          this.initBlockchain(recoveryPeers[i]);
+        };
+        // Complete recovery on next tick
+        process.nextTick(async () => {
+          while(this.holdBackQueue.length > 0) {
+            let nextBlock = this.holdBackQueue.shift();
+            if (nextBlock) {
+              this.addBlock(nextBlock);
+            }
+          }
+          this.inRecovery = false;
+    		});
+      } catch(err) {
+        continue;
+      }
+      break;
+    }
+  }
+
+  private async checkPeerForBlock(block: Block<BlockContent>, peer: Peer) {
+    let missingBlockUUID = block.data.previous_uuid;
+    let recoveredBlocks = [];
+    try {
+      let responseStr = await got(`http://${peer.address}:${peer.port}/blockchain/`
+        + `${missingBlockUUID}`);
+      console.log(`BlockChainServer: recover response: ${responseStr.body}`);
+      let response = JSON.parse(responseStr.body);
+      if (response && response.blocks && response.blocks.length == 1) {
+        // This peer has the missing block
+        return true;
+      }
+    } catch (err) {
+      throw err;
+    }
+    return false;
+  }
+
+  /**
+   * Initializes the blockchain from known peers.
+   */
+  private async initBlockchain(peer?: Peer) {
+    console.log('BlockChainServer: Initializing the blockchain from known peers');
+    let peers: Array<Peer> = [];
+    if (peer) {
+      peers.push(peer);
+    }
+    else {
+      peers = this.peers.getRandomPeerList(this.RECOVERY_PEER_COUNT);
+    }
+
+    let blockList: Array<Block<BlockContent>> = [];
+    for (let i in peers) {
+      try {
+          let response = await got(`http://${peers[i].address}:${peers[i].port}/blockchain`);
+          console.log(`BlockChainServer: init response: ${response.body}`);
+          let blocktreeStruct: BlockchainTreeStruct = JSON.parse(response.body);
+          if (blocktreeStruct && blocktreeStruct.blockchain) {
+            blockList = blocktreeStruct.blockchain;
+          }
+          for (let i in blockList) {
+            this.addBlock(blockList[i], true);
+          }
+      } catch (err) {
+        console.log('BlockChainServer: Unable to init from peer: ' + JSON.stringify(peers[i]));
+        continue;
+      }
+      if (blockList.length > 0) {
+        break;
       }
     }
   }

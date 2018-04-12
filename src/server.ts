@@ -21,7 +21,7 @@ dns.lookup(os.hostname(), (err, address, family) => {
 		throw err
 	}
 
-	const blockchainServer = new BlockChainServer(blocktree, PEER_UPDATE_MS, address, 8082)
+	const blockchainServer = new BlockChainServer(blocktree, PEER_UPDATE_MS, address, 8082, MASTER_HOST, MASTER_PORT)
 	blockchainServer.addMasterPeer(MASTER_HOST, MASTER_PORT) // TODO some kind of cmd line args to set no master
 	blockchainServer.server.listen(8082)
 })

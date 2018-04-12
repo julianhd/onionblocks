@@ -1,9 +1,9 @@
 import { Block, BlockContent } from "./Blockchain"
 
-export interface ChainDetails {
-  blockchain: Array<Block<BlockContent>>
-	nodeList: Array<TreeNode>
-}
+// export interface ChainDetails {
+//   blockchain: Array<Block<BlockContent>>
+// 	nodeList: Array<TreeNode>
+// }
 
 export interface TreeNode {
 	position: number
@@ -43,16 +43,12 @@ export default class BlockchainTree {
         nodeList : [],
         uuidMap : {},
         longestChainHeadPos: -1,
-        longestChainHeadCount: 0
+        longestChainHeadCount: -1
       };
     }
     else {
       this.struct = struct;
     }
-  }
-
-  private uuidExists(uuid: string) {
-    return this.struct.uuidMap[uuid] != undefined;
   }
 
   private getUUIDPos(uuid: string) {
@@ -80,6 +76,10 @@ export default class BlockchainTree {
     this.listeners.forEach(function (callback) {
       callback(block);
     })
+  }
+
+  uuidExists(uuid: string) {
+    return this.struct.uuidMap[uuid] != undefined;
   }
 
   /**
@@ -112,6 +112,7 @@ export default class BlockchainTree {
 
       if (ancestorCount > this.struct.longestChainHeadCount) {
         this.struct.longestChainHeadPos = pos;
+        this.struct.longestChainHeadCount = ancestorCount;
       }
 
       this.updateParentChild(parentPos, pos);
@@ -154,7 +155,7 @@ export default class BlockchainTree {
   getHead() {
     let headPos = this.struct.longestChainHeadPos;
     let head = this.struct.blockchain[headPos];
-    if (!head) {
+    if (head == undefined) {
       return null;
     }
     else {
@@ -163,27 +164,49 @@ export default class BlockchainTree {
   }
 
   /**
-   * Returns a ChainDetails from pos(uuid) + 1.
+   * Returns all descendant from this uuid's blocks.
    *
-   * @param {string} uuid Exclusive uuid from which to start the slice
-   * @returns {ChainDetails}
+   * @param {string} uuid : Ancestor uuid
+   * @returns {Array<Block>}
    */
-  getChainSince(uuid: string) {
-    var chaindetails: ChainDetails;
-    if (!this.uuidExists(uuid)) {
-      chaindetails = {
-        blockchain: [],
-        nodeList: []
+  getBlocksSince(uuid: string) {
+    let nodePos = this.getUUIDPos(uuid);
+    let nodeList: Array<Block<BlockContent>> = [];
+    if (nodePos != undefined) {
+        this.traverse(this.struct.nodeList[nodePos], nodeList);
+    }
+    return nodeList;
+  }
+
+  /**
+   * Returns a block and count ancestors.
+   *
+   * @param {string} uuid : descendant uuid
+   * @param {number} count : Number of ancestors.
+   */
+  getBlocksTo(uuid: string, count: number) {
+    let nextNodePos = this.getUUIDPos(uuid);
+
+    let blockList: Array<Block<BlockContent>> = [];
+
+    if (nextNodePos != undefined) {
+        for (let i = 0; i <= count && nextNodePos != -1; i++) {
+          let node = this.struct.nodeList[nextNodePos];
+          let block = this.struct.blockchain[nextNodePos];
+          blockList.unshift(block);
+          nextNodePos = node.parent;
+        }
+    }
+    return blockList;
+  }
+
+  private traverse(node : TreeNode, blockList : Array<Block<BlockContent>>) {
+    blockList.push(this.struct.blockchain[node.position]);
+    if (node.child.length > 0) {
+      for(let i in node.child) {
+        this.traverse(this.struct.nodeList[node.child[i]], blockList);
       }
     }
-    else {
-      let pos = this.getUUIDPos(uuid);
-      chaindetails = {
-        blockchain: this.struct.blockchain.slice(pos+1),
-        nodeList: this.struct.nodeList.slice(pos+1)
-      }
-    }
-    return chaindetails;
   }
 
   /**

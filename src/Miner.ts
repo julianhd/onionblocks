@@ -1,5 +1,4 @@
 import http from "http"
-import express from "express"
 import Blockchain, {
 	BlockData,
 	Block,
@@ -9,16 +8,11 @@ import Blockchain, {
 import { createHash } from "crypto"
 import uuidv4 from "uuid/v4"
 
-const app = express()
-
 export default class Miner {
 	constructor(private blockchain: Blockchain) {};
 
 	async mine(entity: Entity<any>) {
-		// get the current blockchain
-		const blocks = await this.blockchain.get() // TODO change to a method which gets the right block
-		// console.log("Miner: blocks -- " + JSON.stringify(blocks));
-		const previous_block = blocks[blocks.length - 1]
+		const previous_block = this.blockchain.getHead();
 
 		var sequence_num = 0;
 		if (previous_block) {

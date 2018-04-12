@@ -48,8 +48,9 @@ export default class BlockchainVerifier {
             else {
                 var j: any;
                 for (j in names) {
-                    if (names[j] === block.data.content.name)
-                        throw console.error("This user's name already exists.");
+                    if (names[j] === block.data.content.name) {
+                      throw console.error("This user's name already exists.");
+                    }
                 }
                 names.push(block.data.content.name);
             }

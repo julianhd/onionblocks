@@ -70,14 +70,20 @@ export default class Blockchain {
 	 * Returns all the blocks from the blockchain server.
 	 */
 	async get(): Promise<Array<Block<BlockContent>>> {
-		const response = await got(
-			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain`,
-		)
-		const blocktree: BlockchainTreeStruct = JSON.parse(response.body);
-		const blockchain: Array<Block<BlockContent>> = blocktree.blockchain;
+		if (this.blocktree) {
+			return this.blocktree.getStruct().blockchain;
+		}
+		else {
+			const response = await got(
+				`http://${MASTER_HOST}:${MASTER_PORT}/blockchain`,
+			)
+			const blocktree: BlockchainTreeStruct = JSON.parse(response.body);
+			const blockchain: Array<Block<BlockContent>> = blocktree.blockchain;
 
-		// console.log("Blockchain: get -- " + JSON.stringify(blockchain));
-		return blockchain
+			// console.log("Blockchain: get -- " + JSON.stringify(blockchain));
+			return blockchain
+		}
+
 	}
 
 	/**
@@ -102,6 +108,23 @@ export default class Blockchain {
 	listenBlocks(callback: BlockHandlerCallback) {
 		if(this.blocktree) {
 			this.blocktree.listen(callback);
+		}
+		else {
+			throw new Error("Invalid operation no blockchain associated");
+		}
+	}
+
+	/**
+   * Returns the head block from the longest chain in the tree.
+   *
+   * @returns {Block | null} returns the head of the longest chain, null if tree is empty.
+   */
+	getHead() {
+		if (this.blocktree) {
+			return this.blocktree.getHead();
+		}
+		else {
+			throw new Error("Invalid operation no blockchain associated");
 		}
 	}
 }
