@@ -1,7 +1,11 @@
 import { createHash } from "crypto"
 import got from "got"
-import BlockchainTree, {BlockchainTreeStruct, TreeNode, UUIDMap} from "./BlockTree"
-import { setInterval } from "timers";
+import BlockchainTree, {
+	BlockchainTreeStruct,
+	TreeNode,
+	UUIDMap,
+} from "./BlockTree"
+import { setInterval } from "timers"
 
 const MASTER_HOST = "127.0.0.1"
 const MASTER_PORT = 8082
@@ -37,11 +41,13 @@ export interface BlockData<T extends BlockContent> {
 	previous: string | null
 	previous_uuid: string | null
 	signature: string
+	public: string
 	content: T
 }
 
 export interface Entity<T extends BlockContent> {
 	signature: string
+	public: string
 	content: T
 }
 
@@ -73,8 +79,8 @@ export default class Blockchain {
 		const response = await got(
 			`http://${MASTER_HOST}:${MASTER_PORT}/blockchain`,
 		)
-		const blocktree: BlockchainTreeStruct = JSON.parse(response.body);
-		const blockchain: Array<Block<BlockContent>> = blocktree.blockchain;
+		const blocktree: BlockchainTreeStruct = JSON.parse(response.body)
+		const blockchain: Array<Block<BlockContent>> = blocktree.blockchain
 
 		// console.log("Blockchain: get -- " + JSON.stringify(blockchain));
 		return blockchain
@@ -90,7 +96,7 @@ export default class Blockchain {
 		await got(`http://${MASTER_HOST}:${MASTER_PORT}/block`, {
 			method: "POST",
 			body: block,
-			json: true
+			json: true,
 		})
 	}
 
@@ -100,8 +106,8 @@ export default class Blockchain {
 	 * @param {BlockHandlerCallback} callback : Handler for new blocks
 	 */
 	listenBlocks(callback: BlockHandlerCallback) {
-		if(this.blocktree) {
-			this.blocktree.listen(callback);
+		if (this.blocktree) {
+			this.blocktree.listen(callback)
 		}
 	}
 }

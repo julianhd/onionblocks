@@ -12,7 +12,7 @@ import uuidv4 from "uuid/v4"
 const app = express()
 
 export default class Miner {
-	constructor(private blockchain: Blockchain) {};
+	constructor(private blockchain: Blockchain) {}
 
 	async mine(entity: Entity<any>) {
 		// get the current blockchain
@@ -20,9 +20,9 @@ export default class Miner {
 		// console.log("Miner: blocks -- " + JSON.stringify(blocks));
 		const previous_block = blocks[blocks.length - 1]
 
-		var sequence_num = 0;
+		var sequence_num = 0
 		if (previous_block) {
-			sequence_num = previous_block.data.sequence + 1;
+			sequence_num = previous_block.data.sequence + 1
 		}
 		// console.log(previous_block);
 		// create a new block data
@@ -30,14 +30,15 @@ export default class Miner {
 			uuid: uuidv4(),
 			sequence: sequence_num, // set the sequence field > 1 than the previous one
 			nonce: 0,
-			previous_uuid: (previous_block) ? previous_block.data.uuid : null,
-			previous: (previous_block) ? previous_block.hash : null,
-			signature: entity.signature, // TODO FIX
+			previous_uuid: previous_block ? previous_block.data.uuid : null,
+			previous: previous_block ? previous_block.hash : null,
+			signature: entity.signature,
+			public: entity.public,
 			content: entity.content,
 		}
 		var valid_hash = false
 		var miner_hash
-		let digest;
+		let digest
 		do {
 			let miner_serialization = JSON.stringify(new_block_data)
 

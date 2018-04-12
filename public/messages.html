@@ -35,7 +35,7 @@
                 </li>
                 <li>
                     <a href="javascript:deleteCookies(); window.location.assign('welcome.html');">Logout</a>
-                    
+
                 </li>
             </ul>
 
@@ -76,6 +76,8 @@
                     document.body.onload = addElement;
                     function addElement() {
                         chat.onMessage(chat => {
+                            console.log(chat)
+
                             var newDiv = document.createElement("div");
 
                             // Create a new JavaScript Date object based on the timestamp
@@ -91,7 +93,8 @@
                             // Will display time in 10:30:23 format
                             var formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
 
-                            var from = document.createTextNode(chat.from + " ");
+                            var from = document.createTextNode(chat.from);
+                            var hash = document.createTextNode("#" + chat.hash + " ")
                             var message = document.createTextNode(chat.message);
                             var time = document.createTextNode(formattedTime + "\240\240\240");
 
@@ -100,6 +103,11 @@
                             spanFrom.style["font-weight"] = "bold";
                             spanFrom.appendChild(from);
 
+                            var spanHash = document.createElement("span")
+                            spanHash.style.fontSize = "12px";
+                            spanHash.style.color = "grey";
+                            spanHash.appendChild(hash);
+
                             var spanTime = document.createElement("span");
                             spanTime.style.fontSize = "12px";
                             spanTime.style.color = "grey";
@@ -107,6 +115,7 @@
 
                             newDiv.appendChild(spanTime);
                             newDiv.appendChild(spanFrom);
+                            newDiv.appendChild(spanHash);
                             newDiv.appendChild(message);
 
                             newDiv.style["padding-bottom"] = "5px";
