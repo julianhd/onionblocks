@@ -7,8 +7,9 @@ import os from "os"
 import got from "got"
 
 import Blockchain, { OnionNode, BlockContent, Entity } from "./Blockchain"
-import { Request, Relay, Exit } from "./request"
+import { Request, Relay, Exit, DecryptedRequest } from "./request"
 import Miner from "./Miner"
+import { ChatServer } from "./ChatServer"
 
 const { ONIONBLOCKS_PEER_NODE_HOSTNAME } = process.env
 
@@ -21,7 +22,11 @@ class PeerNodeServer {
 	public readonly server: http.Server
 	private rsa: NodeRSA
 
-	constructor(private serverPort: number, private blockchain: Blockchain) {
+	constructor(
+		private serverPort: number,
+		private blockchain: Blockchain,
+		private chatServer?: ChatServer,
+	) {
 		this.rsa = new NodeRSA()
 		this.init()
 
@@ -32,11 +37,15 @@ class PeerNodeServer {
 		app.post("/request", async (req, res) => {
 			try {
 				const requestMessage: Request = req.body
-				const decryptedMessage: Relay | Exit<any> = this.rsa.decrypt(
+				const decryptedMessage: DecryptedRequest = this.rsa.decrypt(
 					requestMessage.encrypted,
 					"json",
 				)
 				console.log("PeerNodeServer: post decryptedMessage")
+
+				if (this.chatServer != null) {
+					this.chatServer.pushRequest(decryptedMessage)
+				}
 
 				if (decryptedMessage.type == "relay") {
 					// ------ TO BE TESTED --------
@@ -141,7 +150,8 @@ class PeerNodeServer {
 export default function createPeerNodeServer(
 	serverPort: number,
 	blockchain: Blockchain,
+	chatServer?: ChatServer,
 ) {
-	const node = new PeerNodeServer(serverPort, blockchain)
+	const node = new PeerNodeServer(serverPort, blockchain, chatServer)
 	return node.server
 }

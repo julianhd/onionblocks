@@ -13,7 +13,7 @@ export class MissingBlockError extends Error {
 }
 
 export default class BlockchainVerifier {
-	map: Map<string, string> = new Map<string, string>() // Maps names - publickey.
+	map: Map<string, string> = new Map<string, string>() // Maps public key -> name.
 
 	verify(blockchainTree: BlockchainTree, block: Block<BlockContent>) {
 		// console.log("BlochainVerifier: block -- " + JSON.stringify(block));
@@ -38,10 +38,16 @@ export default class BlockchainVerifier {
 		// TODO this might be useless but for now let it there: Check if time permit
 		if (parent != null && parent.data.uuid != block.data.previous_uuid) {
 			throw new Error("The block isn't a child of the parent")
+		} else if (block.data.content.type === "user") {
+			this.map.set(block.data.content.public, block.data.content.name)
 		} else if (block.data.content.type === "chat") {
 			var publicKey = block.data.public
-			if (publicKey === undefined) {
-				throw new Error("Public key not found.")
+			// Less strict for development testing - check if public key found first
+			if (this.map.has(publicKey)) {
+				const expectedName = this.map.get(publicKey)
+				if (expectedName !== block.data.content.from) {
+					throw new Error("Chat message was not signed by " + expectedName)
+				}
 			}
 			var data = JSON.stringify(block.data.content)
 			var key = new NodeRSA(publicKey, "pkcs8-public")

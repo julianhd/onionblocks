@@ -46,7 +46,7 @@ window.chat = {
 		}
 	},
 	onMessage(callback) {
-		const websocket = new WebSocket(`ws://${CHAT_SERVER_URL}`)
+		const websocket = new WebSocket(`ws://${CHAT_SERVER_URL}/api/messages`)
 		websocket.onopen = () => console.log("Connected to server")
 		websocket.onclose = () => console.log("Disconnected from server")
 		websocket.onmessage = event => {

@@ -13,26 +13,37 @@ import onionRouteRequest from "./onionRouteRequest"
 import serveStatic from "serve-static"
 import bodyParser from "body-parser"
 import crypto from "crypto"
+import url from "url"
+import { DecryptedRequest } from "./request"
 
 interface ServerUser extends User {
 	private: string
 	password: string
 }
 
-class ChatServer {
+export class ChatServer {
 	private chatHistory: Array<BlockData<Chat>> = []
+
+	private blockHistory: Array<Block<BlockContent>> = []
+
+	private requestHistory: Array<DecryptedRequest> = []
+
 	public readonly server: http.Server
 
-	private salt: string | null
-	private websockets = new Set<WebSocket>()
+	private chatSockets = new Set<WebSocket>()
+
+	private blockSockets = new Set<WebSocket>()
+
+	private requestSockets = new Set<WebSocket>()
 
 	constructor(private blockchain: Blockchain) {
 		blockchain.listenBlocks(block => {
 			const { data } = block
+			this.blockHistory.push(block)
+			this.broadcastBlock(block)
 			if (data.content.type === "chat") {
-				this.broadcastChat(data as BlockData<Chat>)
 				this.chatHistory.push(data as BlockData<Chat>)
-				console.log("in the blockchain " + this.chatHistory.length)
+				this.broadcastChat(data as BlockData<Chat>)
 			}
 		})
 
@@ -82,20 +93,68 @@ class ChatServer {
 			}
 		})
 		this.server = http.createServer(app)
-		const wss = new WebSocket.Server({ server: this.server })
-		wss.on("connection", (ws, req) => {
+
+		const chatWebSocketServer = new WebSocket.Server({ noServer: true })
+		chatWebSocketServer.on("connection", (ws, req) => {
 			console.log("User connected")
-			this.websockets.add(ws)
+			this.chatSockets.add(ws)
 			this.sendChatHistory(ws)
 			ws.on("close", () => {
 				console.log("User disconnected")
-				this.websockets.delete(ws)
+				this.chatSockets.delete(ws)
 			})
 			ws.on("error", error => {
 				console.log(error)
 			})
 		})
-		this.salt = null
+
+		const blockWebSocketServer = new WebSocket.Server({ noServer: true })
+		blockWebSocketServer.on("connection", (ws, req) => {
+			this.blockSockets.add(ws)
+			this.sendBlockHistory(ws)
+			ws.on("close", () => {
+				this.blockSockets.delete(ws)
+			})
+			ws.on("error", error => {
+				console.log(error)
+			})
+		})
+
+		const requestWebSocketServer = new WebSocket.Server({ noServer: true })
+		requestWebSocketServer.on("connection", (ws, req) => {
+			this.requestSockets.add(ws)
+			this.sendRequestHistory(ws)
+			ws.on("close", () => {
+				this.requestSockets.delete(ws)
+			})
+			ws.on("error", error => {
+				console.log(error)
+			})
+		})
+
+		this.server.on("upgrade", (request, socket, head) => {
+			const pathname = url.parse(request.url).pathname
+			if (pathname === "/api/messages") {
+				chatWebSocketServer.handleUpgrade(request, socket, head, ws =>
+					chatWebSocketServer.emit("connection", ws),
+				)
+			} else if (pathname === "/api/blocks") {
+				blockWebSocketServer.handleUpgrade(request, socket, head, ws =>
+					blockWebSocketServer.emit("connection", ws),
+				)
+			} else if (pathname === "/api/requests") {
+				requestWebSocketServer.handleUpgrade(request, socket, head, ws =>
+					requestWebSocketServer.emit("connection", ws),
+				)
+			} else {
+				socket.destroy()
+			}
+		})
+	}
+
+	public pushRequest(request: DecryptedRequest) {
+		this.requestHistory.push(request)
+		this.broadcastRequest(request)
 	}
 
 	/**
@@ -108,7 +167,7 @@ class ChatServer {
 			{ hash: keyShortHash(block.public) },
 			block.content,
 		)
-		for (const websocket of this.websockets) {
+		for (const websocket of this.chatSockets) {
 			const data = JSON.stringify(object)
 			websocket.send(data)
 		}
@@ -119,7 +178,7 @@ class ChatServer {
 	 *
 	 * @param websocket websocket
 	 */
-	private async sendChatHistory(websocket: WebSocket) {
+	private sendChatHistory(websocket: WebSocket) {
 		for (const block of this.chatHistory) {
 			const object = Object.assign(
 				{ hash: keyShortHash(block.public) },
@@ -130,6 +189,57 @@ class ChatServer {
 		}
 	}
 
+	private broadcastBlock(block: Block<BlockContent>) {
+		for (const websocket of this.blockSockets) {
+			const data = JSON.stringify(block)
+			websocket.send(data)
+		}
+	}
+
+	private sendBlockHistory(websocket: WebSocket) {
+		if (this.blockHistory.length > 50) {
+			for (
+				let i = this.blockHistory.length - 50;
+				i < this.blockHistory.length;
+				i++
+			) {
+				const block = this.blockHistory[i]
+				const data = JSON.stringify(block)
+				websocket.send(data)
+			}
+		} else {
+			for (const block of this.blockHistory) {
+				const data = JSON.stringify(block)
+				websocket.send(data)
+			}
+		}
+	}
+
+	private broadcastRequest(request: DecryptedRequest) {
+		for (const websocket of this.requestSockets) {
+			const data = JSON.stringify(request)
+			websocket.send(data)
+		}
+	}
+
+	private sendRequestHistory(websocket: WebSocket) {
+		if (this.blockHistory.length > 50) {
+			for (
+				let i = this.requestHistory.length - 50;
+				i < this.requestHistory.length;
+				i++
+			) {
+				const request = this.requestHistory[i]
+				const data = JSON.stringify(request)
+				websocket.send(data)
+			}
+		} else {
+			for (const request of this.requestHistory) {
+				const data = JSON.stringify(request)
+				websocket.send(data)
+			}
+		}
+	}
 	/**
 	 * Creates a new RSA key and adds the user to the blockchain using onion routing.
 	 *
@@ -139,8 +249,8 @@ class ChatServer {
 	async register(name: string, pw: string) {
 		var bcrypt = require("bcrypt-nodejs")
 
-		this.salt = bcrypt.genSaltSync()
-		var hashedPw = bcrypt.hashSync(pw, this.salt)
+		var salt = bcrypt.genSaltSync()
+		var hashedPw = bcrypt.hashSync(pw, salt)
 
 		var rsa = require("node-rsa")
 		var keys = new rsa({ b: 256 })
@@ -252,7 +362,7 @@ class ChatServer {
  */
 export default function createChatServer(blockChain: Blockchain) {
 	const chat = new ChatServer(blockChain)
-	return chat.server
+	return chat
 }
 
 // Check for hash collisions
@@ -264,12 +374,12 @@ function keyShortHash(key: string) {
 	const long = hash.digest("hex")
 	const short = long.substr(0, 6)
 
-	if (keyHashes.has(long)) {
-		if (keyHashes.get(long) != short) {
+	if (keyHashes.has(short)) {
+		if (keyHashes.get(short) != long) {
 			throw new Error("Hash collision!")
 		}
 	} else {
-		keyHashes.set(long, short)
+		keyHashes.set(short, long)
 	}
 
 	return short
