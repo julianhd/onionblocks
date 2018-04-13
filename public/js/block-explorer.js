@@ -3,6 +3,7 @@ class BlockExplorer extends React.Component {
 		super(props)
 		this.state = {
 			blocks: [],
+			showNodes: true,
 		}
 	}
 
@@ -28,6 +29,9 @@ class BlockExplorer extends React.Component {
 		const elements = []
 		for (const block of this.state.blocks) {
 			const { data } = block
+			if (!this.state.showNodes && data.content.type === "node") {
+				continue
+			}
 			const visualizer = (
 				<div className="bx-block" key={data.uuid}>
 					<BlockProp name="ID" content={data.uuid} />
@@ -62,7 +66,26 @@ class BlockExplorer extends React.Component {
 			)
 			elements.push(visualizer)
 		}
-		return <div>{elements}</div>
+		return (
+			<div>
+				<label>
+					Show nodes:
+					<input
+						type="checkbox"
+						checked={this.state.showNodes}
+						onChange={this.handleShowNodesChange}
+					/>
+				</label>
+				<br />
+				{elements}
+			</div>
+		)
+	}
+
+	handleShowNodesChange = event => {
+		this.setState({
+			showNodes: event.target.checked,
+		})
 	}
 }
 
