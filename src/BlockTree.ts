@@ -1,4 +1,5 @@
-import { Block, BlockContent } from "./Blockchain"
+import { Block, BlockContent, Chat, User, OnionNode } from "./Blockchain"
+import NodeSet from "./NodeSet"
 
 // export interface ChainDetails {
 //   blockchain: Array<Block<BlockContent>>
@@ -27,6 +28,7 @@ export interface BlockchainTreeStruct {
 export default class BlockchainTree {
   private struct: BlockchainTreeStruct;
   private listeners: Array<(block: Block<BlockContent>) => any>;
+  private nodeSet: NodeSet;
 
   /**
    * Create a BlockchainTree.
@@ -49,6 +51,7 @@ export default class BlockchainTree {
     else {
       this.struct = struct;
     }
+    this.nodeSet = new NodeSet;
   }
 
   private getUUIDPos(uuid: string) {
@@ -116,8 +119,12 @@ export default class BlockchainTree {
       }
 
       this.updateParentChild(parentPos, pos);
-
       this.struct.uuidMap[block.data.uuid] = pos;
+
+      if (block.data.content.type == "node") {
+        this.nodeSet.addNode(block.data.content);
+      }
+
 
       this.notifyListeners(block);
   }
@@ -144,6 +151,17 @@ export default class BlockchainTree {
     else {
       return this.struct.blockchain[parentPos];
     }
+  }
+
+  /**
+   * Returns a list of up to 'count' random and active OnionNode.
+   *
+   * @param {number} count: Number of peers to retrieve
+   *
+   * @returns {Array<OnionNode>} List of 'count' random peers.
+   */
+  getRandomNodeList(count: number) {
+    return this.nodeSet.getRandomNodeList(count);
   }
 
 

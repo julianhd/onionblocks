@@ -24,9 +24,9 @@ export default class NodeSet {
    * @param {OnionNode} node : node to add to the set
    * @returns {Boolean} true on success, false if node is invalid
    */
-  addPeer(node: OnionNode) {
+  addNode(node: OnionNode) {
     if (node && node.type == "node" && node.host && node.port && node.timestamp) {
-      let existingContainer: NodeContainer | undefined = (this.nodeMap[node.port]) ? this.nodeMap[node.host][node.port] : undefined;
+      let existingContainer: NodeContainer | undefined = (this.nodeMap[node.host]) ? this.nodeMap[node.host][node.port] : undefined;
       if (existingContainer) {
         existingContainer.node = node;
       }
@@ -97,7 +97,7 @@ export default class NodeSet {
    * @returns {Boolean} true if the peer is alive
    */
   private nodeIsDead(node: OnionNode) {
-    return ((Date.now() - node.timestamp) <= this.TTL);
+    return ((Date.now() - node.timestamp) > this.TTL);
   }
 
   /**

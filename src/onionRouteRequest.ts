@@ -14,8 +14,8 @@ export default async function onionRouteRequest<T extends BlockContent>(
 	entity: Entity<T>,
 	blockchain: Blockchain
 ) {
-	const blocks = await blockchain.get()
-	const [n1, n2, n3] = chooseRoutingNodes(blocks)
+	const [n1, n2, n3] = blockchain.getRandomNodeList(3);
+	console.log("onionRouteRequest: node chosen -- " + JSON.stringify(n1) + " :: " + JSON.stringify(n2) + " :: " + JSON.stringify(n3));
 
 	const exit: Exit<T> = {
 		type: "exit",
@@ -39,18 +39,6 @@ export default async function onionRouteRequest<T extends BlockContent>(
 	});
 
 	console.log("OnionRouteQuest: sent first request");
-}
-
-function* chooseRoutingNodes(blocks: Array<Block<BlockContent>>) {
-	const nodes = []
-	for (const node of routingNodes(blocks)) {
-		// TODO Filter out stale nodes
-		nodes.push(node)
-	}
-	// TODO randomize selection
-	yield nodes[0]
-	yield nodes[1]
-	yield nodes[2]
 }
 
 function* routingNodes(blocks: Array<Block<BlockContent>>) {
