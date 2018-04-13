@@ -10,7 +10,9 @@ class RequestExplorer extends React.Component {
 		const websocket = new WebSocket(`ws://${window.location.host}/api/requests`)
 		websocket.onmessage = async event => {
 			const data = JSON.parse(event.data)
-			data.__encrypted = await sha256(data.encrypted)
+			if (data.encrypted != null) {
+				data.__encrypted = await sha256(data.encrypted)
+			}
 			console.log(data)
 			this.setState(prevState => ({
 				requests: [data, ...prevState.requests],
