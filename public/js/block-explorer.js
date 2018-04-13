@@ -12,6 +12,9 @@ class BlockExplorer extends React.Component {
 			const data = JSON.parse(event.data)
 			data.__signature = await sha256(data.data.signature)
 			data.__key = await sha256(data.data.public)
+			if (data.data.content.type === "node") {
+				data.__node_public = await sha256(data.data.content.public)
+			}
 			if (data.data.content.type === "user") {
 				data.__user_public = await sha256(data.data.content.public)
 			}
@@ -28,11 +31,19 @@ class BlockExplorer extends React.Component {
 			const visualizer = (
 				<div className="bx-block" key={data.uuid}>
 					<BlockProp name="ID" content={data.uuid} />
-					<BlockProp name="Previous" content={data.previous_uuid} />
+					<BlockProp name="Previous" content={data.previous_uuid || "null"} />
 					<BlockProp name="Nonce" content={data.nonce} />
 					<BlockProp name="Signature" content={block.__signature} />
 					<BlockProp name="Public Key" content={block.__key} />
 					<BlockProp name="Type" content={data.content.type} />
+					{data.content.type === "node" ? (
+						<div>
+							<BlockProp name="Timestamp" content={data.content.timestamp} />
+							<BlockProp name="Host" content={data.content.host} />
+							<BlockProp name="Port" content={data.content.port} />
+							<BlockProp name="Public Key" content={block.__node_public} />
+						</div>
+					) : null}
 					{data.content.type === "chat" ? (
 						<div>
 							<BlockProp name="Timestamp" content={data.content.timestamp} />
