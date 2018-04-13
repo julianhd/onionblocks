@@ -374,12 +374,12 @@ function keyShortHash(key: string) {
 	const long = hash.digest("hex")
 	const short = long.substr(0, 6)
 
-	if (keyHashes.has(long)) {
-		if (keyHashes.get(long) != short) {
+	if (keyHashes.has(short)) {
+		if (keyHashes.get(short) != long) {
 			throw new Error("Hash collision!")
 		}
 	} else {
-		keyHashes.set(long, short)
+		keyHashes.set(short, long)
 	}
 
 	return short
