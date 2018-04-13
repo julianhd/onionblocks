@@ -26,7 +26,7 @@ export default class NodeSet {
    */
   addPeer(node: OnionNode) {
     if (node && node.type == "node" && node.host && node.port && node.timestamp) {
-      let existingContainer: NodeContainer = (this.nodeMap[node.port]) ? this.nodeMap[node.host][node.port] : undefined;
+      let existingContainer: NodeContainer | undefined = (this.nodeMap[node.port]) ? this.nodeMap[node.host][node.port] : undefined;
       if (existingContainer) {
         existingContainer.node = node;
       }
