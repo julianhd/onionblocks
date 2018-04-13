@@ -14,22 +14,27 @@ import serveStatic from "serve-static"
 import bodyParser from "body-parser"
 import crypto from "crypto"
 import url from "url"
+import { DecryptedRequest } from "./request"
 
 interface ServerUser extends User {
 	private: string
 	password: string
 }
 
-class ChatServer {
+export class ChatServer {
 	private chatHistory: Array<BlockData<Chat>> = []
 
 	private blockHistory: Array<Block<BlockContent>> = []
+
+	private requestHistory: Array<DecryptedRequest> = []
 
 	public readonly server: http.Server
 
 	private chatSockets = new Set<WebSocket>()
 
 	private blockSockets = new Set<WebSocket>()
+
+	private requestSockets = new Set<WebSocket>()
 
 	constructor(private blockchain: Blockchain) {
 		blockchain.listenBlocks(block => {
@@ -115,6 +120,18 @@ class ChatServer {
 			})
 		})
 
+		const requestWebSocketServer = new WebSocket.Server({ noServer: true })
+		requestWebSocketServer.on("connection", (ws, req) => {
+			this.requestSockets.add(ws)
+			this.sendRequestHistory(ws)
+			ws.on("close", () => {
+				this.requestSockets.delete(ws)
+			})
+			ws.on("error", error => {
+				console.log(error)
+			})
+		})
+
 		this.server.on("upgrade", (request, socket, head) => {
 			const pathname = url.parse(request.url).pathname
 			if (pathname === "/api/messages") {
@@ -125,10 +142,19 @@ class ChatServer {
 				blockWebSocketServer.handleUpgrade(request, socket, head, ws =>
 					blockWebSocketServer.emit("connection", ws),
 				)
+			} else if (pathname === "/api/requests") {
+				requestWebSocketServer.handleUpgrade(request, socket, head, ws =>
+					requestWebSocketServer.emit("connection", ws),
+				)
 			} else {
 				socket.destroy()
 			}
 		})
+	}
+
+	public pushRequest(request: DecryptedRequest) {
+		this.requestHistory.push(request)
+		this.broadcastRequest(request)
 	}
 
 	/**
@@ -189,6 +215,31 @@ class ChatServer {
 		}
 	}
 
+	private broadcastRequest(request: DecryptedRequest) {
+		for (const websocket of this.requestSockets) {
+			const data = JSON.stringify(request)
+			websocket.send(data)
+		}
+	}
+
+	private sendRequestHistory(websocket: WebSocket) {
+		if (this.blockHistory.length > 50) {
+			for (
+				let i = this.requestHistory.length - 50;
+				i < this.requestHistory.length;
+				i++
+			) {
+				const request = this.requestHistory[i]
+				const data = JSON.stringify(request)
+				websocket.send(data)
+			}
+		} else {
+			for (const request of this.requestHistory) {
+				const data = JSON.stringify(request)
+				websocket.send(data)
+			}
+		}
+	}
 	/**
 	 * Creates a new RSA key and adds the user to the blockchain using onion routing.
 	 *
@@ -311,7 +362,7 @@ class ChatServer {
  */
 export default function createChatServer(blockChain: Blockchain) {
 	const chat = new ChatServer(blockChain)
-	return chat.server
+	return chat
 }
 
 // Check for hash collisions
