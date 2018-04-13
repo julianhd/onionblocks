@@ -48,8 +48,8 @@ export default class PeerSet {
         }
         this.peerMap[peer.address][peer.port] = node;
         this.peerList.push(node);
+        // console.log('PeerSet: New Peer -- ' + JSON.stringify(this.peerList));
       }
-      console.log('PeerSet: New Peer -- ' + JSON.stringify(this.peerList));
       return true;
     }
     else {
@@ -74,7 +74,7 @@ export default class PeerSet {
       let nodePick = this.peerList[pick];
 
       if (this.peerIsDead(nodePick)) {
-        console.log('PeerSet: Dead Peer, removing -- ' + JSON.stringify(nodePick));
+        // console.log('PeerSet: Dead Peer, removing -- ' + JSON.stringify(nodePick));
         this.removePeer(pick);
         continue;
       }
@@ -82,7 +82,6 @@ export default class PeerSet {
       this.swapNode(pick, this.peerList.length - 1)
 
       i++;
-      console.log('PeerSet: sample -- ' +  JSON.stringify(sample));
     }
 
     return sample;

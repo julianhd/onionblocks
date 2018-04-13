@@ -161,7 +161,8 @@ export default class BlockChainServer {
 
     // Put the block in holdBackQueue if we're currently recovering from failure.
     // It will be processed later by the recovery mechanism
-    if (this.inRecovery) {
+    if (this.inRecovery && !isRecovery) {
+      console.log('Adding to holdBackQueue -- ' + JSON.stringify(block));
       this.holdBackQueue.push(block);
     }
     else {
@@ -224,27 +225,31 @@ export default class BlockChainServer {
 
   private async recover(fromBlock: Block<BlockContent>) {
     this.inRecovery = true;
-    let recoveryPeers = this.peers.getRandomPeerList(this.RECOVERY_PEER_COUNT);
+    let recoveryPeers = this.peers.getAllPeers();
     for (let i in recoveryPeers) {
       try {
         if (await this.checkPeerForBlock(fromBlock, recoveryPeers[i])) {
           this.initBlockchain(recoveryPeers[i]);
+          console.log("FUCKETY FUCK I FINISHED INITBLOCKCHAIN");
         };
-        // Complete recovery on next tick
-        process.nextTick(async () => {
-          while(this.holdBackQueue.length > 0) {
-            let nextBlock = this.holdBackQueue.shift();
-            if (nextBlock) {
-              this.addBlock(nextBlock);
-            }
-          }
-          this.inRecovery = false;
-    		});
       } catch(err) {
         continue;
       }
+      console.log('BlockChainServer: Recovery Finished');
       break;
     }
+    // Complete recovery on next tick
+    // process.nextTick(async () => {
+      console.log('BlockChainServer: Emptying holdbackqueue');
+      this.inRecovery = false;
+      while(this.holdBackQueue.length > 0) {
+        let nextBlock = this.holdBackQueue.shift();
+        if (nextBlock) {
+          await this.addBlock(nextBlock, true);
+        }
+      }
+      console.log("HERE BE DRAGONS !!!!!!!!!!! " + this.inRecovery);
+    // });
   }
 
   private async checkPeerForBlock(block: Block<BlockContent>, peer: Peer) {
@@ -272,6 +277,7 @@ export default class BlockChainServer {
     console.log('BlockChainServer: Initializing the blockchain from known peers');
     let peers: Array<Peer> = [];
     if (peer) {
+      console.log('BlockChainServer: Known peer recovery -- ' + JSON.stringify(peer));
       peers.push(peer);
     }
     else {
@@ -280,6 +286,7 @@ export default class BlockChainServer {
 
     let blockList: Array<Block<BlockContent>> = [];
     for (let i in peers) {
+      console.log('BlockChainServer: Calling peer -- ' + JSON.stringify(peers[i]));
       try {
           let response = await got(`http://${peers[i].address}:${peers[i].port}/blockchain`);
           console.log(`BlockChainServer: init response: ${response.body}`);
@@ -287,7 +294,9 @@ export default class BlockChainServer {
           if (blocktreeStruct && blocktreeStruct.blockchain) {
             blockList = blocktreeStruct.blockchain;
           }
+          console.log('BlockChainServer: BLOCKLISt -- ' + JSON.stringify(blockList));
           for (let i in blockList) {
+            console.log(`BlockChainServer: adding block -- ` + JSON.stringify(blockList[i]) );
             this.addBlock(blockList[i], true);
           }
       } catch (err) {
@@ -323,7 +332,7 @@ export default class BlockChainServer {
       let peer = allPeers[i];
       try {
         // Register yourself with that peer
-        await got(`http://${peer.address}:${peer.port}/block`, {
+        got(`http://${peer.address}:${peer.port}/block`, {
       		method: "POST",
       		body: block,
       		json: true
