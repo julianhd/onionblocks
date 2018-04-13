@@ -13,6 +13,7 @@ import onionRouteRequest from "./onionRouteRequest"
 import serveStatic from "serve-static"
 import bodyParser from "body-parser"
 import crypto from "crypto"
+import url from "url"
 
 interface ServerUser extends User {
 	private: string
@@ -21,18 +22,23 @@ interface ServerUser extends User {
 
 class ChatServer {
 	private chatHistory: Array<BlockData<Chat>> = []
+
+	private blockHistory: Array<Block<BlockContent>> = []
+
 	public readonly server: http.Server
 
-	private salt: string | null
-	private websockets = new Set<WebSocket>()
+	private chatSockets = new Set<WebSocket>()
+
+	private blockSockets = new Set<WebSocket>()
 
 	constructor(private blockchain: Blockchain) {
 		blockchain.listenBlocks(block => {
 			const { data } = block
+			this.blockHistory.push(block)
+			this.broadcastBlock(block)
 			if (data.content.type === "chat") {
-				this.broadcastChat(data as BlockData<Chat>)
 				this.chatHistory.push(data as BlockData<Chat>)
-				console.log("in the blockchain " + this.chatHistory.length)
+				this.broadcastChat(data as BlockData<Chat>)
 			}
 		})
 
@@ -82,20 +88,47 @@ class ChatServer {
 			}
 		})
 		this.server = http.createServer(app)
-		const wss = new WebSocket.Server({ server: this.server })
-		wss.on("connection", (ws, req) => {
+
+		const chatWebSocketServer = new WebSocket.Server({ noServer: true })
+		chatWebSocketServer.on("connection", (ws, req) => {
 			console.log("User connected")
-			this.websockets.add(ws)
+			this.chatSockets.add(ws)
 			this.sendChatHistory(ws)
 			ws.on("close", () => {
 				console.log("User disconnected")
-				this.websockets.delete(ws)
+				this.chatSockets.delete(ws)
 			})
 			ws.on("error", error => {
 				console.log(error)
 			})
 		})
-		this.salt = null
+
+		const blockWebSocketServer = new WebSocket.Server({ noServer: true })
+		blockWebSocketServer.on("connection", (ws, req) => {
+			this.blockSockets.add(ws)
+			this.sendBlockHistory(ws)
+			ws.on("close", () => {
+				this.blockSockets.delete(ws)
+			})
+			ws.on("error", error => {
+				console.log(error)
+			})
+		})
+
+		this.server.on("upgrade", (request, socket, head) => {
+			const pathname = url.parse(request.url).pathname
+			if (pathname === "/api/messages") {
+				chatWebSocketServer.handleUpgrade(request, socket, head, ws =>
+					chatWebSocketServer.emit("connection", ws),
+				)
+			} else if (pathname === "/api/blocks") {
+				blockWebSocketServer.handleUpgrade(request, socket, head, ws =>
+					blockWebSocketServer.emit("connection", ws),
+				)
+			} else {
+				socket.destroy()
+			}
+		})
 	}
 
 	/**
@@ -108,7 +141,7 @@ class ChatServer {
 			{ hash: keyShortHash(block.public) },
 			block.content,
 		)
-		for (const websocket of this.websockets) {
+		for (const websocket of this.chatSockets) {
 			const data = JSON.stringify(object)
 			websocket.send(data)
 		}
@@ -119,7 +152,7 @@ class ChatServer {
 	 *
 	 * @param websocket websocket
 	 */
-	private async sendChatHistory(websocket: WebSocket) {
+	private sendChatHistory(websocket: WebSocket) {
 		for (const block of this.chatHistory) {
 			const object = Object.assign(
 				{ hash: keyShortHash(block.public) },
@@ -127,6 +160,32 @@ class ChatServer {
 			)
 			const data = JSON.stringify(object)
 			websocket.send(data)
+		}
+	}
+
+	private broadcastBlock(block: Block<BlockContent>) {
+		for (const websocket of this.blockSockets) {
+			const data = JSON.stringify(block)
+			websocket.send(data)
+		}
+	}
+
+	private sendBlockHistory(websocket: WebSocket) {
+		if (this.blockHistory.length > 50) {
+			for (
+				let i = this.blockHistory.length - 50;
+				i < this.blockHistory.length;
+				i++
+			) {
+				const block = this.blockHistory[i]
+				const data = JSON.stringify(block)
+				websocket.send(data)
+			}
+		} else {
+			for (const block of this.blockHistory) {
+				const data = JSON.stringify(block)
+				websocket.send(data)
+			}
 		}
 	}
 
@@ -139,8 +198,8 @@ class ChatServer {
 	async register(name: string, pw: string) {
 		var bcrypt = require("bcrypt-nodejs")
 
-		this.salt = bcrypt.genSaltSync()
-		var hashedPw = bcrypt.hashSync(pw, this.salt)
+		var salt = bcrypt.genSaltSync()
+		var hashedPw = bcrypt.hashSync(pw, salt)
 
 		var rsa = require("node-rsa")
 		var keys = new rsa({ b: 256 })
