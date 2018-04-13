@@ -21,8 +21,9 @@ class RequestExplorer extends React.Component {
 	render() {
 		const elements = []
 		for (const request of this.state.requests) {
+			const key = JSON.stringify(request)
 			const visualizer = (
-				<div className="bx-block" key={request.uuid}>
+				<div className="bx-block" key={key}>
 					<BlockProp name="Type" content={request.type} />
 					{request.type === "relay" ? (
 						<div>
