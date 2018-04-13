@@ -322,8 +322,8 @@ export default class BlockChainServer {
   }
 
   async broadcastBlock(block: Block<BlockContent>) {
-    // console.log('BlockChainServer: Broadcasting new block');
     let allPeers = this.peers.getAllPeers();
+    console.log('BlockChainServer: Broadcasting ' + JSON.stringify(block.data.uuid) + ' to ' + JSON.stringify(allPeers));
     for (let i = 0; i < allPeers.length; i++) {
       let peer = allPeers[i];
       try {

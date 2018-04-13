@@ -133,4 +133,20 @@ export default class Blockchain {
 			throw new Error("Invalid operation no blockchain associated");
 		}
 	}
+
+	/**
+	 * Returns a list of up to 'count' random and active OnionNode.
+	 *
+	 * @param {number} count: Number of peers to retrieve
+	 *
+	 * @returns {Array<OnionNode>} List of 'count' random peers.
+	 */
+	getRandomNodeList(count: number) {
+		if (this.blocktree) {
+			return this.blocktree.getRandomNodeList(count);
+		}
+		else {
+			throw new Error("Invalid operation no blockchain associated");
+		}
+	}
 }
