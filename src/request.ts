@@ -14,3 +14,5 @@ export interface Exit<T extends BlockContent> {
 	type: "exit"
 	content: Entity<T>
 }
+
+export type DecryptedRequest = Relay | Exit<BlockContent>
