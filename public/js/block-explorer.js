@@ -34,8 +34,13 @@ class BlockExplorer extends React.Component {
 			}
 			const visualizer = (
 				<div className="bx-block" key={data.uuid}>
+					<BlockProp name="Hash" content={block.hash} />
+					<BlockProp name="Parent" content={data.previous} />
 					<BlockProp name="ID" content={data.uuid} />
-					<BlockProp name="Previous" content={data.previous_uuid || "null"} />
+					<BlockProp
+						name="Previous ID"
+						content={data.previous_uuid || "null"}
+					/>
 					<BlockProp name="Nonce" content={data.nonce} />
 					<BlockProp name="Signature" content={block.__signature} />
 					<BlockProp name="Public Key" content={block.__key} />
