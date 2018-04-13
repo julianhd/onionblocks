@@ -142,6 +142,7 @@ export default class BlockChainServer {
 
     this.server = http.createServer(app);
 
+    this.syncPeers();
     setInterval(async () => {
       this.syncPeers();
     }, updateInterval);
@@ -323,7 +324,7 @@ export default class BlockChainServer {
 
   async broadcastBlock(block: Block<BlockContent>) {
     let allPeers = this.peers.getAllPeers();
-    console.log('BlockChainServer: Broadcasting ' + JSON.stringify(block.data.uuid) + ' to ' + JSON.stringify(allPeers));
+    // console.log('BlockChainServer: Broadcasting ' + JSON.stringify(block.data.uuid) + ' to ' + JSON.stringify(allPeers));
     for (let i = 0; i < allPeers.length; i++) {
       let peer = allPeers[i];
       try {
