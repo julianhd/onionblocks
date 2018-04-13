@@ -127,7 +127,7 @@ export default class PeerSet {
    * @returns {Boolean} true if the peer is alive
    */
   private peerIsDead(node: PeerNode) {
-    return ((Date.now() - node.timestamp) > node.peer.ttl) && !node.peer.isMaster;
+    return ((Date.now() - node.timestamp) <= node.peer.ttl) && !node.peer.isMaster;
   }
 
   /**
