@@ -54,6 +54,12 @@ export default class BlockchainTree {
     this.nodeSet = new NodeSet;
   }
 
+  /**
+   * Returns the position in the struct of the block with uuid.
+   *
+   * @param {strinng} uuid : UUID of the block
+   * @returns {number | undefined} Position of the block or undefined if non existant
+   */
   private getUUIDPos(uuid: string) {
     return this.struct.uuidMap[uuid];
   }
@@ -69,18 +75,35 @@ export default class BlockchainTree {
     }
   }
 
+  /**
+   * Updates the child of the parent nodes to include childPos.
+   *
+   * @param {number} pos : Position of the parent
+   * @param {number} pos : Position of the child
+   */
   private updateParentChild(pos: number, childPos: number) {
     if (pos >= 0) {
       this.struct.nodeList[pos].child.push(childPos);
     }
   }
 
+  /**
+   * Notifies all listeners of the given block.
+   *
+   * @param {Block} block : New block to notify listeners of
+   */
   private async notifyListeners(block: Block<BlockContent>) {
     this.listeners.forEach(function (callback) {
       callback(block);
     })
   }
 
+  /**
+   * Returns true if this uuid exists in the chain.
+   *
+   * @param {string} uuid : given uuid
+   * @returns {Boolean} true if it exists, false otherwise
+   */
   uuidExists(uuid: string) {
     return this.struct.uuidMap[uuid] != undefined;
   }
@@ -218,6 +241,15 @@ export default class BlockchainTree {
     return blockList;
   }
 
+  /**
+   * Traverse the tree and returns a list of block from the given ancestor
+   *
+   * Recursive function.
+   *
+   * @param {TreeNode} node : First ancestor
+   * @param {Array<Block>} blockList : List to add the block found along the traversal
+   * @returns {Void}
+   */
   private traverse(node : TreeNode, blockList : Array<Block<BlockContent>>) {
     blockList.push(this.struct.blockchain[node.position]);
     if (node.child.length > 0) {

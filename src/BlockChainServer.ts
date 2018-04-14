@@ -27,8 +27,9 @@ export default class BlockChainServer {
   private inRecovery: Boolean;
   private thisPeer: Peer;
 
-  private RECOVERY_PEER_COUNT: number = 3;
+  private RECOVERY_PEER_COUNT: number = 5;
   private RECOVERY_BLOCK_COUNT: number = 15;
+  private BROADCAST_PEER_COUNT: number = 5;
   private PEER_FETCH_COUNT: number = 3;
   private DEFAULT_TTL: number = 600000; // 10 minutes
 
@@ -193,6 +194,11 @@ export default class BlockChainServer {
     return true;
   }
 
+  /**
+   * Synchronizes the peer list from known peers.
+   *
+   * Registers itself with known peer and ask for a random sampling from each.
+   */
   private async syncPeers() {
     console.log('BlockChainServer: Syncing peers');
     let updatePeerList = this.peers.getRandomPeerList(this.PEER_FETCH_COUNT);
@@ -223,9 +229,15 @@ export default class BlockChainServer {
     }
   }
 
+  /**
+   * Recovers the blockchain when an error was thrown from fromBlock.
+   *
+   * @param {Block} fromBlock : Block that caused the error
+   *
+   */
   private async recover(fromBlock: Block<BlockContent>) {
     this.inRecovery = true;
-    let recoveryPeers = this.peers.getAllPeers();
+    let recoveryPeers = this.peers.getRandomPeerList(this.RECOVERY_PEER_COUNT);
     for (let i in recoveryPeers) {
       try {
         if (await this.checkPeerForBlock(fromBlock, recoveryPeers[i])) {
@@ -270,6 +282,10 @@ export default class BlockChainServer {
 
   /**
    * Initializes the blockchain from known peers.
+   *
+   * If peer is given will use that peer instead of a random sampling of RECOVERY_PEER_COUNT
+   *
+   * @param {Peer} [peer] : [Optional] Known Peer to init from
    */
   private async initBlockchain(peer?: Peer) {
     let peers: Array<Peer> = [];
@@ -322,8 +338,14 @@ export default class BlockChainServer {
     });
   }
 
+  /**
+   * Broadcast a block to random known peers up to BROADCAST_PEER_COUNT
+   *
+   * @param {Block} block : Block to broadcast
+   * @return {Void}
+   */
   async broadcastBlock(block: Block<BlockContent>) {
-    let allPeers = this.peers.getAllPeers();
+    let allPeers = this.peers.getRandomPeerList(this.BROADCAST_PEER_COUNT);
     // console.log('BlockChainServer: Broadcasting ' + JSON.stringify(block.data.uuid) + ' to ' + JSON.stringify(allPeers));
     for (let i = 0; i < allPeers.length; i++) {
       let peer = allPeers[i];
