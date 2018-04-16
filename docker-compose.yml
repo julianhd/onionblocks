@@ -1,0 +1,36 @@
+version: "3"
+services:
+  onionblocks1:
+    build: .
+    environment:
+      - MASTER_HOST=onionblocks1
+    ports:
+      - "8080:80"
+  onionblocks2:
+    build: .
+    environment:
+      - MASTER_HOST=onionblocks1
+    ports:
+      - "8081:80"
+    command: dockerize -wait http://onionblocks1/api/ping node lib/server.js
+  onionblocks3:
+    build: .
+    environment:
+      - MASTER_HOST=onionblocks1
+    ports:
+      - "8082:80"
+    command: dockerize -wait http://onionblocks1/api/ping node lib/server.js
+  onionblocks4:
+    build: .
+    environment:
+      - MASTER_HOST=onionblocks1
+    ports:
+      - "8083:80"
+    command: dockerize -wait http://onionblocks1/api/ping node lib/server.js
+  onionblocks5:
+    build: .
+    environment:
+      - MASTER_HOST=onionblocks1
+    ports:
+      - "8084:80"
+    command: dockerize -wait http://onionblocks1/api/ping node lib/server.js
