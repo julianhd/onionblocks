@@ -12,6 +12,7 @@
 		"lib",
 		"scripts"
 	],
+	"bin": "./lib/onionblocks.js",
 	"scripts": {
 		"precommit": "lint-staged",
 		"test": "jest --forceExit",

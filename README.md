@@ -4,31 +4,19 @@
 
 ## Getting Started
 
-1. Install [Visual Studio Code](https://code.visualstudio.com/).
-2. Clone the repository and `cd` into it.
-3. Start the server:
+### Prerequisites
+
+* [Node.js 9](https://nodejs.org/en/)
+
+### Usage
 
 ```sh
-$ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash # Install Node Version Manager
-$ nvm install 9.5 # Install Node.js
-$ nvm use # Initialize Node.js
-$ npm install # Install packages
-$ npm start # Start server
-```
-
-## Developing
-
-```sh
-$ git checkout -b $USER # Create a branch with your name
-$ git push origin $USER # Push your branch to the repo
-```
-
-To merge your changes into `master`, create a **pull request** with your branch.
-
-## Run Tests
-
-```sh
-$ npm test
+$ npm install -g onionblocks
+$ (mkdir -p node1 && cd node1 && PORT_RANGE_START=8010 onionblocks)
+$ (mkdir -p node2 && cd node2 && PORT_RANGE_START=8020 onionblocks)
+$ (mkdir -p node3 && cd node3 && PORT_RANGE_START=8030 onionblocks)
+$ (mkdir -p node4 && cd node4 && PORT_RANGE_START=8040 onionblocks)
+$ (mkdir -p node5 && cd node5 && PORT_RANGE_START=8050 onionblocks)
 ```
 
 ## Authors
